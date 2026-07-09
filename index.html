@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Warung COGS — Kalkulator HPP &amp; Kasir Restoran</title>
+<meta name="theme-color" content="#153f30">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kasir Cafe">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍽️</text></svg>">
 <style>
 :root{
@@ -1206,6 +1213,11 @@ async function init(){
   if(firstRun) setTimeout(()=>toast('👋 Selamat datang! Data demo sudah dimuat. PIN Admin: 1234'), 400);
 }
 init();
+
+/* PWA: daftar service worker agar bisa di-install sebagai aplikasi HP & jalan offline */
+if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
 </script>
 </body>
 </html>

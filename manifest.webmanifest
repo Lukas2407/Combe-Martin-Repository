@@ -1,0 +1,16 @@
+{
+  "name": "Warung COGS — Kalkulator HPP & Kasir",
+  "short_name": "Kasir Cafe",
+  "description": "Kalkulator COGS/HPP dan kasir invoice untuk restoran & cafe. Offline, aman dengan PIN Admin.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#153f30",
+  "theme_color": "#153f30",
+  "lang": "id",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
