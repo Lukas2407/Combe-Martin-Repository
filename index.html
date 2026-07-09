@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Warung COGS — Kalkulator HPP &amp; Kasir Restoran</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍽️</text></svg>">
+<style>
+:root{
+  --green:#1e5c46; --green-dark:#153f30; --green-light:#e8f3ee;
+  --amber:#e8a13d; --amber-dark:#c9821c;
+  --bg:#f4f6f3; --card:#ffffff; --ink:#1c2b24; --muted:#68776f;
+  --line:#e3e8e4; --danger:#c0392b; --danger-bg:#fdecea;
+  --radius:14px; --shadow:0 1px 3px rgba(20,40,30,.08),0 4px 16px rgba(20,40,30,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.5}
+button{font:inherit;cursor:pointer}
+input,select,textarea{font:inherit;color:var(--ink)}
+h1,h2,h3{line-height:1.25}
+
+/* ---------- layout ---------- */
+.app{display:flex;min-height:100vh}
+.sidebar{width:230px;background:var(--green-dark);color:#dfece6;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;flex-shrink:0}
+.brand{padding:20px 18px 14px;border-bottom:1px solid rgba(255,255,255,.09)}
+.brand .logo{font-size:26px}
+.brand .name{font-weight:700;font-size:16px;color:#fff;margin-top:4px;word-break:break-word}
+.brand .tag{font-size:11.5px;color:#9dbcae;margin-top:2px}
+.nav{flex:1;padding:12px 10px;overflow-y:auto}
+.nav button{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;margin-bottom:4px;background:none;border:0;border-radius:10px;color:#c4d8cd;font-size:14px;text-align:left;font-weight:500}
+.nav button:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav button.active{background:var(--amber);color:#2a1f08;font-weight:700}
+.nav .sep{margin:12px 12px 8px;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#7fa392}
+.rolebox{padding:14px;border-top:1px solid rgba(255,255,255,.09)}
+.rolechip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:99px;background:#31614e;color:#dff3e9;margin-bottom:8px}
+.rolechip.admin{background:var(--amber);color:#2a1f08}
+.rolebox button{width:100%;padding:8px;border:1px solid rgba(255,255,255,.25);background:none;border-radius:9px;color:#e6f2ec;font-size:13px;font-weight:600}
+.rolebox button:hover{background:rgba(255,255,255,.1)}
+.main{flex:1;min-width:0;padding:24px clamp(14px,3vw,36px) 60px}
+.pagehead{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:18px}
+.pagehead h1{font-size:22px;font-weight:800}
+.pagehead .sub{width:100%;color:var(--muted);font-size:13.5px}
+.pagehead .spacer{flex:1}
+
+/* ---------- components ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:16px}
+.card h2{font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.grid{display:grid;gap:14px}
+.grid.stats{grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px}
+.stat .lab{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.stat .val{font-size:20px;font-weight:800;margin-top:2px;color:var(--green)}
+.stat .note{font-size:11.5px;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:10px;border:1px solid var(--line);background:#fff;font-weight:600;font-size:13.5px;color:var(--ink)}
+.btn:hover{background:#f2f5f2}
+.btn-primary{background:var(--green);border-color:var(--green);color:#fff}
+.btn-primary:hover{background:var(--green-dark)}
+.btn-amber{background:var(--amber);border-color:var(--amber);color:#2a1f08}
+.btn-amber:hover{background:var(--amber-dark);color:#fff}
+.btn-danger{background:var(--danger-bg);border-color:#f0c4bd;color:var(--danger)}
+.btn-danger:hover{background:var(--danger);color:#fff}
+.btn-sm{padding:5px 10px;font-size:12.5px;border-radius:8px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:4px}
+.field input,.field select,.field textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#fff}
+.field input:focus,.field select:focus{outline:2px solid var(--green);outline-offset:-1px;border-color:var(--green)}
+.field .hint{font-size:11.5px;color:var(--muted);margin-top:3px}
+.frow{display:grid;gap:12px}
+.frow.c2{grid-template-columns:1fr 1fr}
+.frow.c3{grid-template-columns:1fr 1fr 1fr}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:640px}
+th{background:var(--green-light);color:var(--green-dark);text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.03em;padding:10px 12px;white-space:nowrap}
+td{padding:9px 12px;border-top:1px solid var(--line);vertical-align:middle}
+tr:nth-child(even) td{background:#fafcfa}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11.5px;font-weight:700;background:var(--green-light);color:var(--green-dark)}
+.pill.amber{background:#fdf2df;color:var(--amber-dark)}
+.pill.gray{background:#eef1ee;color:var(--muted)}
+.pill.red{background:var(--danger-bg);color:var(--danger)}
+.searchbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.searchbar input,.searchbar select{padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.searchbar input{flex:1;min-width:160px}
+.empty{padding:34px;text-align:center;color:var(--muted)}
+.empty .big{font-size:34px}
+
+/* modal */
+.overlay{position:fixed;inset:0;background:rgba(15,30,23,.5);display:none;align-items:flex-start;justify-content:center;padding:4vh 14px;z-index:50;overflow-y:auto}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.3);width:100%;max-width:560px;padding:22px;animation:pop .18s ease}
+.modal.wide{max-width:760px}
+.modal.narrow{max-width:380px}
+@keyframes pop{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+.modal h2{font-size:17px;font-weight:800;margin-bottom:14px}
+.modal .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+
+/* toast */
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 20px;border-radius:99px;font-size:13.5px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .25s;z-index:90;max-width:90vw;text-align:center}
+#toast.show{opacity:1}
+
+/* kasir */
+.pos{display:grid;grid-template-columns:1fr 360px;gap:16px;align-items:start}
+.prodgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.prodcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;text-align:left;transition:transform .08s, border-color .12s}
+.prodcard:hover{border-color:var(--green);transform:translateY(-1px)}
+.prodcard .pn{font-weight:700;font-size:13.5px;line-height:1.3}
+.prodcard .pc{font-size:11px;color:var(--muted);margin:2px 0 6px}
+.prodcard .pp{font-weight:800;color:var(--green);font-size:14px}
+.cart{position:sticky;top:16px}
+.cartitems{max-height:44vh;overflow-y:auto;margin-bottom:10px}
+.citem{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.citem .cn{flex:1;min-width:0}
+.citem .cn b{font-size:13px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.citem .cn span{font-size:11.5px;color:var(--muted)}
+.qtybtn{width:26px;height:26px;border-radius:8px;border:1px solid var(--line);background:#fff;font-weight:800;line-height:1}
+.citem .qv{width:26px;text-align:center;font-weight:700;font-size:13.5px}
+.citem .amt{font-weight:700;font-size:13px;width:80px;text-align:right;font-variant-numeric:tabular-nums}
+.totrow{display:flex;justify-content:space-between;font-size:13.5px;padding:3px 0}
+.totrow.grand{font-size:17px;font-weight:800;color:var(--green);border-top:2px solid var(--ink);margin-top:6px;padding-top:8px}
+
+/* receipt / print */
+.receipt{font-family:"Courier New",monospace;font-size:12.5px;background:#fff;color:#000;width:300px;margin:0 auto;padding:14px}
+.receipt .c{text-align:center}
+.receipt .rname{font-size:15px;font-weight:800}
+.receipt hr{border:0;border-top:1px dashed #000;margin:7px 0}
+.receipt table{min-width:0;font-size:12px}
+.receipt td,.receipt th{padding:2px 0;border:0;background:#fff!important}
+.receipt .rrow{display:flex;justify-content:space-between}
+#printArea{display:none}
+@media print{
+  body *{visibility:hidden}
+  #printArea,#printArea *{visibility:visible}
+  #printArea{display:block;position:absolute;left:0;top:0;width:100%}
+}
+
+/* responsive */
+@media(max-width:980px){
+  .pos{grid-template-columns:1fr}
+  .cart{position:static}
+}
+@media(max-width:820px){
+  .app{flex-direction:column}
+  .sidebar{width:100%;height:auto;position:static;flex-direction:column}
+  .nav{display:flex;overflow-x:auto;padding:8px}
+  .nav button{width:auto;white-space:nowrap;margin:0 4px 0 0}
+  .nav .sep{display:none}
+  .rolebox{display:flex;align-items:center;gap:10px;padding:10px 14px}
+  .rolebox .rolechip{margin:0}
+  .rolebox button{width:auto}
+  .frow.c2,.frow.c3{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app" id="appRoot">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">🍽️</div>
+      <div class="name" id="brandName">Warung COGS</div>
+      <div class="tag">Kalkulator HPP &amp; Kasir</div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="rolebox">
+      <span class="rolechip" id="roleChip">👤 Mode Kasir</span>
+      <button id="roleBtn">🔓 Masuk Admin</button>
+    </div>
+  </aside>
+  <main class="main" id="main"></main>
+</div>
+
+<div class="overlay" id="overlay"><div class="modal" id="modalBox"></div></div>
+<div id="toast"></div>
+<div id="printArea"></div>
+
+<script>
+'use strict';
+/* =====================================================================
+   Warung COGS — aplikasi kalkulator HPP (COGS) & kasir untuk restoran.
+   Satu file, offline, data tersimpan di IndexedDB perangkat ini.
+   Rumus mengikuti Excel:
+     unit cost   = harga beli / isi kemasan
+     biaya bahan = Σ (qty per porsi × unit cost)
+     overhead    = gaji/porsi + utilitas/porsi   (porsi = produksi bulanan)
+     COGS        = bahan + overhead
+     harga saran = COGS / (1 - margin)
+   ===================================================================== */
+
+/* ---------- util ---------- */
+const $  = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const fmt = new Intl.NumberFormat('id-ID');
+const rp = n => 'Rp ' + fmt.format(Math.round(+n || 0));
+const rp2 = n => 'Rp ' + fmt.format(Math.round(((+n || 0) + Number.EPSILON) * 100) / 100);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const num = v => { const n = parseFloat(String(v).replace(',', '.')); return isFinite(n) ? n : 0; };
+const round500up = n => Math.ceil(n / 500) * 500;
+const dstr = d => { const x = new Date(d); return x.toLocaleDateString('id-ID', {day:'2-digit',month:'short',year:'numeric'}); };
+const tstr = d => new Date(d).toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'});
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('show'), 2600); }
+
+/* ---------- SHA-256 (WebCrypto + fallback murni JS utk file://) ---------- */
+function sha256Sync(str){
+  const utf8 = unescape(encodeURIComponent(str));
+  const rr = (v,a)=>(v>>>a)|(v<<(32-a));
+  const maxWord = Math.pow(2,32);
+  let words=[], result='';
+  const bitLen = utf8.length*8;
+  let hash = sha256Sync.h = sha256Sync.h || [];
+  const k = sha256Sync.k = sha256Sync.k || [];
+  let primeCounter = k.length;
+  const isComposite = {};
+  for(let candidate=2; primeCounter<64; candidate++){
+    if(!isComposite[candidate]){
+      for(let i=0;i<313;i+=candidate) isComposite[i]=candidate;
+      hash[primeCounter] = (Math.pow(candidate,.5)*maxWord)|0;
+      k[primeCounter++] = (Math.pow(candidate,1/3)*maxWord)|0;
+    }
+  }
+  let a = utf8 + '\x80';
+  while(a.length % 64 - 56) a += '\x00';
+  for(let i=0;i<a.length;i++){
+    const j = a.charCodeAt(i);
+    words[i>>2] |= j << ((3-i)%4)*8;
+  }
+  words[words.length] = (bitLen/maxWord)|0;
+  words[words.length] = bitLen;
+  for(let j=0;j<words.length;){
+    const w = words.slice(j, j+=16);
+    const oldHash = hash.slice(0,8);
+    hash = hash.slice(0,8);
+    for(let i=0;i<64;i++){
+      const w15 = w[i-15], w2 = w[i-2];
+      const a0 = hash[0], e0 = hash[4];
+      const temp1 = hash[7]
+        + (rr(e0,6)^rr(e0,11)^rr(e0,25))
+        + ((e0&hash[5])^((~e0)&hash[6]))
+        + k[i]
+        + (w[i] = (i<16) ? w[i] : (w[i-16] + (rr(w15,7)^rr(w15,18)^(w15>>>3)) + w[i-7] + (rr(w2,17)^rr(w2,19)^(w2>>>10)))|0);
+      const temp2 = (rr(a0,2)^rr(a0,13)^rr(a0,22)) + ((a0&hash[1])^(a0&hash[2])^(hash[1]&hash[2]));
+      hash = [(temp1+temp2)|0].concat(hash);
+      hash[4] = (hash[4]+temp1)|0;
+    }
+    for(let i=0;i<8;i++) hash[i] = (hash[i]+oldHash[i])|0;
+  }
+  for(let i=0;i<8;i++) for(let j=3;j+1;j--){
+    const b = (hash[i]>>(j*8))&255;
+    result += ((b<16)?'0':'') + b.toString(16);
+  }
+  return result;
+}
+async function sha256(str){
+  try{
+    if(crypto && crypto.subtle){
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+  }catch(e){/* file:// di sebagian browser */}
+  return sha256Sync(str);
+}
+
+/* ---------- penyimpanan (IndexedDB, fallback localStorage) ---------- */
+const DB_NAME = 'warungCogsDB';
+let _db = null, _useLS = false;
+function dbOpen(){
+  return new Promise((res)=>{
+    if(!window.indexedDB){ _useLS = true; return res(null); }
+    const r = indexedDB.open(DB_NAME, 1);
+    r.onupgradeneeded = () => {
+      const d = r.result;
+      if(!d.objectStoreNames.contains('kv')) d.createObjectStore('kv');
+      if(!d.objectStoreNames.contains('invoices')) d.createObjectStore('invoices', {keyPath:'id'});
+    };
+    r.onsuccess = () => { _db = r.result; res(_db); };
+    r.onerror = () => { _useLS = true; res(null); };
+  });
+}
+function kvSet(key, val){
+  if(_useLS){ try{ localStorage.setItem('wc_'+key, JSON.stringify(val)); }catch(e){ toast('⚠️ Penyimpanan penuh!'); } return Promise.resolve(); }
+  return new Promise((res,rej)=>{
+    const tx = _db.transaction('kv','readwrite');
+    tx.objectStore('kv').put(val, key);
+    tx.oncomplete = res; tx.onerror = ()=>rej(tx.error);
+  });
+}
+function kvGet(key){
+  if(_useLS){ try{ return Promise.resolve(JSON.parse(localStorage.getItem('wc_'+key))); }catch(e){ return Promise.resolve(null); } }
+  return new Promise((res,rej)=>{
+    const rq = _db.transaction('kv').objectStore('kv').get(key);
+    rq.onsuccess = ()=>res(rq.result ?? null); rq.onerror = ()=>rej(rq.error);
+  });
+}
+function invPut(inv){
+  if(_useLS){ const all = lsInv(); const i = all.findIndex(x=>x.id===inv.id); i>=0 ? all[i]=inv : all.push(inv); try{ localStorage.setItem('wc_invoices', JSON.stringify(all)); }catch(e){ toast('⚠️ Penyimpanan penuh!'); } return Promise.resolve(); }
+  return new Promise((res,rej)=>{
+    const tx = _db.transaction('invoices','readwrite');
+    tx.objectStore('invoices').put(inv);
+    tx.oncomplete = res; tx.onerror = ()=>rej(tx.error);
+  });
+}
+function invDel(id){
+  if(_useLS){ localStorage.setItem('wc_invoices', JSON.stringify(lsInv().filter(x=>x.id!==id))); return Promise.resolve(); }
+  return new Promise((res,rej)=>{
+    const tx = _db.transaction('invoices','readwrite');
+    tx.objectStore('invoices').delete(id);
+    tx.oncomplete = res; tx.onerror = ()=>rej(tx.error);
+  });
+}
+function invAll(){
+  if(_useLS) return Promise.resolve(lsInv());
+  return new Promise((res,rej)=>{
+    const rq = _db.transaction('invoices').objectStore('invoices').getAll();
+    rq.onsuccess = ()=>res(rq.result||[]); rq.onerror = ()=>rej(rq.error);
+  });
+}
+function invClear(){
+  if(_useLS){ localStorage.removeItem('wc_invoices'); return Promise.resolve(); }
+  return new Promise((res,rej)=>{
+    const tx = _db.transaction('invoices','readwrite');
+    tx.objectStore('invoices').clear();
+    tx.oncomplete = res; tx.onerror = ()=>rej(tx.error);
+  });
+}
+function lsInv(){ try{ return JSON.parse(localStorage.getItem('wc_invoices'))||[]; }catch(e){ return []; } }
+
+/* ---------- state ---------- */
+const S = {
+  role: 'kasir',            // 'kasir' | 'admin'
+  tab: 'kasir',
+  settings: null, overhead: null, materials: null, products: null,
+  invoices: [],             // cache utk laporan
+  cart: [], cartDiscType: '%', cartDiscVal: 0,
+  lockTimer: null,
+};
+const DEFAULT_PIN = '1234';
+
+async function saveAll(){ await Promise.all([
+  kvSet('settings', S.settings), kvSet('overhead', S.overhead),
+  kvSet('materials', S.materials), kvSet('products', S.products)
+]); }
+const saveSettings  = () => kvSet('settings', S.settings);
+const saveOverhead  = () => kvSet('overhead', S.overhead);
+const saveMaterials = () => kvSet('materials', S.materials);
+const saveProducts  = () => kvSet('products', S.products);
+
+/* ---------- data demo (persis mengikuti Excel COGS_Final_Combe_Martin) ---------- */
+function demoData(){
+  const materials = [
+    {id:1,  name:'Beras',         category:'Grains',    unit:'Kg',    purchasePrice:180000, packageSize:50},
+    {id:2,  name:'Ayam Segar',    category:'Protein',   unit:'Kg',    purchasePrice:140000, packageSize:20},
+    {id:3,  name:'Telur',         category:'Protein',   unit:'Butir', purchasePrice:3000,   packageSize:30},
+    {id:4,  name:'Minyak Goreng', category:'Oil',       unit:'Liter', purchasePrice:300000, packageSize:20},
+    {id:5,  name:'Tomat',         category:'Vegetable', unit:'Kg',    purchasePrice:25000,  packageSize:5},
+    {id:6,  name:'Bawang Merah',  category:'Vegetable', unit:'Kg',    purchasePrice:40000,  packageSize:2},
+    {id:7,  name:'Bawang Putih',  category:'Vegetable', unit:'Kg',    purchasePrice:50000,  packageSize:1},
+    {id:8,  name:'Garam',         category:'Seasoning', unit:'Kg',    purchasePrice:30000,  packageSize:1},
+    {id:9,  name:'Gula',          category:'Seasoning', unit:'Kg',    purchasePrice:35000,  packageSize:1},
+    {id:10, name:'Merica',        category:'Seasoning', unit:'Kg',    purchasePrice:150000, packageSize:1},
+    {id:11, name:'Gula Merah',    category:'Seasoning', unit:'Kg',    purchasePrice:100000, packageSize:3},
+    {id:12, name:'Jamur Kancing', category:'Protein',   unit:'Kg',    purchasePrice:20000,  packageSize:2},
+    {id:13, name:'Daging Sapi',   category:'Protein',   unit:'Kg',    purchasePrice:300000, packageSize:5},
+    {id:14, name:'Teh Celup',     category:'Beverage',  unit:'Kantong',purchasePrice:12000, packageSize:25},
+    {id:15, name:'Kopi Bubuk',    category:'Beverage',  unit:'Kg',    purchasePrice:120000, packageSize:1},
+  ];
+  const products = [
+    {id:'p1', name:'Nasi Goreng Ayam', category:'Makanan', type:'recipe', includeOverhead:true, marginPct:10, sellPrice:6500, active:true,
+      ingredients:[{materialId:1,qty:0.2},{materialId:2,qty:0.1},{materialId:3,qty:1},{materialId:4,qty:0.05},{materialId:6,qty:0.02},{materialId:8,qty:0.002},{materialId:11,qty:0.003}]},
+    {id:'p2', name:'Telur Ceplok', category:'Makanan', type:'recipe', includeOverhead:true, marginPct:0, sellPrice:4000, active:true,
+      ingredients:[{materialId:3,qty:2},{materialId:4,qty:0.03},{materialId:8,qty:0.001}]},
+    {id:'p3', name:'Soto Ayam', category:'Makanan', type:'recipe', includeOverhead:true, marginPct:0, sellPrice:5500, active:true,
+      ingredients:[{materialId:2,qty:0.15},{materialId:6,qty:0.03},{materialId:7,qty:0.01},{materialId:8,qty:0.002},{materialId:10,qty:0.001}]},
+    {id:'p4', name:'Soto Ayam Jamur', category:'Makanan', type:'recipe', includeOverhead:true, marginPct:40, sellPrice:17000, active:true,
+      ingredients:[{materialId:11,qty:0.001},{materialId:2,qty:1}]},
+    {id:'p5', name:'Soto Daging Sapi', category:'Makanan', type:'recipe', includeOverhead:true, marginPct:70, sellPrice:34000, active:true,
+      ingredients:[{materialId:13,qty:0.1},{materialId:8,qty:0.002},{materialId:4,qty:0.003},{materialId:2,qty:0.15}]},
+    {id:'p6', name:'Es Teh Manis', category:'Minuman', type:'recipe', includeOverhead:true, marginPct:60, sellPrice:5000, active:true,
+      ingredients:[{materialId:14,qty:1},{materialId:9,qty:0.02}]},
+    {id:'p7', name:'Kopi Susu', category:'Minuman', type:'recipe', includeOverhead:true, marginPct:60, sellPrice:12000, active:true,
+      ingredients:[{materialId:15,qty:0.015},{materialId:9,qty:0.015}]},
+    {id:'p8', name:'Air Mineral Botol', category:'Minuman', type:'simple', includeOverhead:false, simpleCost:3000, marginPct:40, sellPrice:6000, active:true, ingredients:[]},
+    {id:'p9', name:'Kerupuk', category:'Lainnya', type:'simple', includeOverhead:false, simpleCost:1000, marginPct:50, sellPrice:2000, active:true, ingredients:[]},
+  ];
+  const overhead = { monthlySalary:10000000, monthlyPortions:5000, electricity:3000000, water:500000, gas:1000000, other:300000 };
+  return { materials, products, overhead };
+}
+async function seedDemo(withInvoices){
+  const d = demoData();
+  S.materials = d.materials; S.products = d.products; S.overhead = d.overhead;
+  await saveAll();
+  if(withInvoices){
+    await invClear();
+    const now = new Date();
+    const mk = (offsetH, items, cust) => {
+      const t = new Date(now.getTime() - offsetH*3600e3);
+      const rows = items.map(([pid,qty])=>{
+        const p = S.products.find(x=>x.id===pid); const c = productCost(p);
+        return { productId:pid, name:p.name, price:p.sellPrice, cost:c.total, qty };
+      });
+      const sub = rows.reduce((a,r)=>a+r.price*r.qty,0);
+      return { id:uid(), number:invoiceNumber(t), date:t.toISOString(), cashier:'Demo', customer:cust,
+               items:rows, discType:'%', discVal:0, discount:0, taxPct:0, tax:0, subtotal:sub, total:sub, paid:sub, change:0 };
+    };
+    const demos = [
+      mk(30, [['p1',2],['p6',2],['p9',2]], 'Meja 4'),
+      mk(5,  [['p5',1],['p3',1],['p7',2]], 'Ibu Sari'),
+      mk(1,  [['p4',1],['p8',1]], ''),
+    ];
+    for(const iv of demos) await invPut(iv);
+  }
+}
+
+/* ---------- perhitungan (rumus Excel) ---------- */
+function matUnitCost(m){ return m && m.packageSize > 0 ? m.purchasePrice / m.packageSize : 0; }
+function overheadCalc(){
+  const o = S.overhead;
+  const labor = o.monthlyPortions > 0 ? o.monthlySalary / o.monthlyPortions : 0;
+  const utilTotal = (+o.electricity||0) + (+o.water||0) + (+o.gas||0) + (+o.other||0);
+  const util = o.monthlyPortions > 0 ? utilTotal / o.monthlyPortions : 0;
+  return { labor, util, utilTotal, total: labor + util };
+}
+function productCost(p){
+  const oh = overheadCalc();
+  let raw = 0;
+  if(p.type === 'simple'){ raw = +p.simpleCost || 0; }
+  else for(const ing of (p.ingredients||[])){
+    const m = S.materials.find(x=>x.id === ing.materialId);
+    raw += (+ing.qty||0) * matUnitCost(m);
+  }
+  const labor = p.includeOverhead ? oh.labor : 0;
+  const util  = p.includeOverhead ? oh.util  : 0;
+  return { raw, labor, util, total: raw + labor + util };
+}
+function recommendedPrice(cogs, marginPct){
+  const m = (+marginPct||0)/100;
+  return m < 1 ? cogs/(1-m) : 0;
+}
+function invoiceNumber(date){
+  const d = new Date(date||Date.now());
+  const ymd = d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
+  S.settings.invSeq = S.settings.invSeq || {};
+  const seq = (S.settings.invSeq[ymd]||0) + 1;
+  S.settings.invSeq[ymd] = seq;
+  saveSettings();
+  return `INV-${ymd}-${String(seq).padStart(3,'0')}`;
+}
+
+/* ---------- peran & keamanan ---------- */
+function isAdmin(){ return S.role === 'admin'; }
+function requireAdmin(){ if(!isAdmin()){ toast('🔒 Hanya Admin. Masuk Admin dulu.'); return false; } return true; }
+function armAutoLock(){
+  clearTimeout(S.lockTimer);
+  if(isAdmin()) S.lockTimer = setTimeout(()=>{ lockToKasir(); toast('🔒 Admin terkunci otomatis (5 menit tidak aktif).'); }, 5*60*1000);
+}
+['click','keydown','touchstart'].forEach(ev => document.addEventListener(ev, armAutoLock, {passive:true}));
+function lockToKasir(){ S.role = 'kasir'; if(!TABS[S.tab] || TABS[S.tab].admin) S.tab = 'kasir'; renderAll(); }
+function askPin(){
+  openModal(`
+    <h2>🔐 Masuk sebagai Admin</h2>
+    <div class="field"><label>PIN Admin</label>
+      <input type="password" id="pinInput" inputmode="numeric" autocomplete="off" placeholder="Masukkan PIN">
+      <div class="hint">PIN bawaan: <b>1234</b> — segera ganti di menu Pengaturan!</div>
+    </div>
+    <div class="actions">
+      <button class="btn" onclick="closeModal()">Batal</button>
+      <button class="btn btn-primary" id="pinOk">Masuk</button>
+    </div>`, 'narrow');
+  const input = $('#pinInput'); input.focus();
+  const submit = async () => {
+    const h = await sha256(input.value);
+    if(h === S.settings.pinHash){
+      S.role = 'admin'; closeModal(); armAutoLock(); renderAll(); toast('✅ Masuk sebagai Admin');
+      if(input.value === DEFAULT_PIN) setTimeout(()=>toast('⚠️ Anda masih memakai PIN bawaan 1234. Ganti di Pengaturan!'), 2800);
+    } else { toast('❌ PIN salah'); input.value=''; input.focus(); }
+  };
+  $('#pinOk').onclick = submit;
+  input.onkeydown = e => { if(e.key === 'Enter') submit(); };
+}
+
+/* ---------- modal ---------- */
+function openModal(html, size){
+  const box = $('#modalBox');
+  box.className = 'modal' + (size ? ' ' + size : '');
+  box.innerHTML = html;
+  $('#overlay').classList.add('open');
+}
+function closeModal(){ $('#overlay').classList.remove('open'); }
+$('#overlay').addEventListener('click', e => { if(e.target.id === 'overlay') closeModal(); });
+
+/* ---------- navigasi ---------- */
+const TABS = {
+  kasir:     {icon:'🧾', label:'Kasir / Invoice', admin:false},
+  dashboard: {icon:'📊', label:'Dashboard & Overhead', admin:true},
+  materials: {icon:'📦', label:'Bahan Baku', admin:true},
+  products:  {icon:'🍳', label:'Menu, Resep & COGS', admin:true},
+  reports:   {icon:'📈', label:'Laporan Penjualan', admin:true},
+  settings:  {icon:'⚙️', label:'Pengaturan', admin:true},
+};
+function renderNav(){
+  const nav = $('#nav');
+  let html = '';
+  for(const [key,t] of Object.entries(TABS)){
+    if(t.admin && !isAdmin()) continue;
+    if(key === 'dashboard') html += '<div class="sep">Admin</div>';
+    html += `<button data-tab="${key}" class="${S.tab===key?'active':''}">${t.icon} ${t.label}</button>`;
+  }
+  nav.innerHTML = html;
+  $$('#nav button').forEach(b => b.onclick = () => { S.tab = b.dataset.tab; renderAll(); });
+  const chip = $('#roleChip'), btn = $('#roleBtn');
+  chip.textContent = isAdmin() ? '⭐ Mode Admin' : '👤 Mode Kasir';
+  chip.className = 'rolechip' + (isAdmin() ? ' admin' : '');
+  btn.textContent = isAdmin() ? '🔒 Kunci (kembali ke Kasir)' : '🔓 Masuk Admin';
+  btn.onclick = () => { if(isAdmin()){ lockToKasir(); toast('🔒 Kembali ke mode Kasir'); } else askPin(); };
+  $('#brandName').textContent = S.settings.cafeName || 'Warung COGS';
+}
+function renderAll(){
+  renderNav();
+  const t = TABS[S.tab];
+  if(t.admin && !isAdmin()) S.tab = 'kasir';
+  ({kasir:renderKasir, dashboard:renderDashboard, materials:renderMaterials,
+    products:renderProducts, reports:renderReports, settings:renderSettings})[S.tab]();
+}
+
+/* =================== KASIR =================== */
+function renderKasir(){
+  const cats = ['Semua','Makanan','Minuman','Lainnya'];
+  $('#main').innerHTML = `
+    <div class="pagehead"><h1>🧾 Kasir &amp; Invoice Penjualan</h1>
+      <div class="sub">Pilih produk, atur jumlah, lalu simpan &amp; cetak invoice. Harga sudah dikunci oleh Admin.</div></div>
+    <div class="pos">
+      <div>
+        <div class="searchbar">
+          <input id="posSearch" placeholder="🔍 Cari menu…">
+          <select id="posCat">${cats.map(c=>`<option>${c}</option>`).join('')}</select>
+        </div>
+        <div class="prodgrid" id="prodGrid"></div>
+        <div class="card" style="margin-top:16px">
+          <h2>🕑 Transaksi Terakhir Hari Ini</h2>
+          <div id="recentInv"></div>
+        </div>
+      </div>
+      <div class="card cart">
+        <h2>🛒 Keranjang</h2>
+        <div class="cartitems" id="cartItems"></div>
+        <div class="field"><label>Nama Pelanggan / Meja (opsional)</label><input id="custName" placeholder="cth: Meja 3"></div>
+        <div class="frow c2">
+          <div class="field"><label>Diskon</label>
+            <div style="display:flex;gap:6px">
+              <input id="discVal" type="number" min="0" step="any" value="${S.cartDiscVal||0}" style="flex:1">
+              <select id="discType" style="width:70px"><option${S.cartDiscType==='%'?' selected':''}>%</option><option${S.cartDiscType==='Rp'?' selected':''}>Rp</option></select>
+            </div>
+            ${!isAdmin() && (S.settings.maxDiscKasir||0) < 100 ? `<div class="hint">Maks. diskon kasir: ${S.settings.maxDiscKasir||0}%</div>` : ''}
+          </div>
+          <div class="field"><label>Pajak (%)</label><input id="taxPct" type="number" min="0" step="any" value="${S.settings.taxPct||0}" ${isAdmin()?'':'readonly'}></div>
+        </div>
+        <div id="cartTotals"></div>
+        <div class="field" style="margin-top:10px"><label>Uang Dibayar (Rp)</label>
+          <div style="display:flex;gap:6px">
+            <input id="paidAmt" type="number" min="0" step="any" style="flex:1">
+            <button class="btn btn-sm" id="exactBtn" title="Uang pas">Pas</button>
+          </div>
+          <div class="hint" id="changeHint"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <button class="btn" style="flex:1" id="clearCart">Kosongkan</button>
+          <button class="btn btn-primary" style="flex:2" id="saveInv">💾 Simpan &amp; Cetak</button>
+        </div>
+      </div>
+    </div>`;
+  const draw = () => drawProdGrid($('#posSearch').value, $('#posCat').value);
+  $('#posSearch').oninput = draw; $('#posCat').onchange = draw;
+  draw(); drawCart(); drawRecent();
+  $('#discVal').oninput = e => { S.cartDiscVal = num(e.target.value); drawCart(true); };
+  $('#discType').onchange = e => { S.cartDiscType = e.target.value; drawCart(true); };
+  $('#taxPct').oninput = () => drawCart(true);
+  $('#paidAmt').oninput = () => updateChange();
+  $('#exactBtn').onclick = () => { $('#paidAmt').value = Math.round(cartTotals().total); updateChange(); };
+  $('#clearCart').onclick = () => { S.cart = []; S.cartDiscVal = 0; renderKasir(); };
+  $('#saveInv').onclick = saveInvoice;
+}
+function drawProdGrid(q, cat){
+  const list = S.products.filter(p => p.active !== false)
+    .filter(p => !cat || cat==='Semua' || p.category===cat)
+    .filter(p => !q || p.name.toLowerCase().includes(q.toLowerCase()));
+  $('#prodGrid').innerHTML = list.length ? list.map(p => `
+    <button class="prodcard" data-id="${p.id}">
+      <div class="pn">${esc(p.name)}</div>
+      <div class="pc">${esc(p.category)}</div>
+      <div class="pp">${rp(p.sellPrice)}</div>
+    </button>`).join('') : `<div class="empty" style="grid-column:1/-1"><div class="big">🍽️</div>Tidak ada produk. ${isAdmin()?'Tambahkan di menu "Menu, Resep & COGS".':'Minta Admin menambahkan menu.'}</div>`;
+  $$('#prodGrid .prodcard').forEach(b => b.onclick = () => addToCart(b.dataset.id));
+}
+function addToCart(pid){
+  const p = S.products.find(x=>x.id===pid); if(!p) return;
+  const row = S.cart.find(r=>r.productId===pid);
+  if(row) row.qty++;
+  else {
+    const c = productCost(p);
+    S.cart.push({ productId:pid, name:p.name, price:+p.sellPrice||0, cost:c.total, qty:1 });
+  }
+  drawCart(true);
+}
+function cartTotals(){
+  const subtotal = S.cart.reduce((a,r)=>a+r.price*r.qty, 0);
+  let discVal = num($('#discVal') ? $('#discVal').value : S.cartDiscVal);
+  const discType = $('#discType') ? $('#discType').value : S.cartDiscType;
+  // batasi diskon utk kasir
+  const maxPct = isAdmin() ? 100 : (+S.settings.maxDiscKasir||0);
+  let discount = discType==='%' ? subtotal*discVal/100 : discVal;
+  const capped = subtotal*maxPct/100;
+  if(discount > capped){ discount = capped; }
+  if(discount > subtotal) discount = subtotal;
+  const taxPct = num($('#taxPct') ? $('#taxPct').value : S.settings.taxPct);
+  const tax = (subtotal-discount)*taxPct/100;
+  return { subtotal, discount, discType, discVal, taxPct, tax, total: subtotal-discount+tax };
+}
+function drawCart(keep){
+  const box = $('#cartItems'); if(!box) return;
+  box.innerHTML = S.cart.length ? S.cart.map((r,i)=>`
+    <div class="citem">
+      <div class="cn"><b>${esc(r.name)}</b><span>${rp(r.price)} × ${r.qty}</span></div>
+      <button class="qtybtn" data-i="${i}" data-d="-1">−</button>
+      <span class="qv">${r.qty}</span>
+      <button class="qtybtn" data-i="${i}" data-d="1">+</button>
+      <span class="amt">${rp(r.price*r.qty)}</span>
+    </div>`).join('') : '<div class="empty">Keranjang kosong.<br>Klik produk di kiri untuk menambah.</div>';
+  $$('#cartItems .qtybtn').forEach(b => b.onclick = () => {
+    const r = S.cart[+b.dataset.i]; r.qty += +b.dataset.d;
+    if(r.qty<=0) S.cart.splice(+b.dataset.i,1);
+    drawCart(true);
+  });
+  const t = cartTotals();
+  $('#cartTotals').innerHTML = `
+    <div class="totrow"><span>Subtotal</span><b>${rp(t.subtotal)}</b></div>
+    <div class="totrow"><span>Diskon</span><b>− ${rp(t.discount)}</b></div>
+    <div class="totrow"><span>Pajak (${t.taxPct||0}%)</span><b>${rp(t.tax)}</b></div>
+    <div class="totrow grand"><span>TOTAL</span><span>${rp(t.total)}</span></div>`;
+  updateChange();
+}
+function updateChange(){
+  const t = cartTotals();
+  const paid = num($('#paidAmt') && $('#paidAmt').value);
+  $('#changeHint').innerHTML = paid >= t.total && S.cart.length
+    ? `Kembalian: <b style="color:var(--green)">${rp(paid - t.total)}</b>`
+    : (paid>0 ? `<span style="color:var(--danger)">Kurang ${rp(t.total-paid)}</span>` : '');
+}
+async function saveInvoice(){
+  if(!S.cart.length) return toast('Keranjang masih kosong');
+  const t = cartTotals();
+  const paid = num($('#paidAmt').value);
+  if(paid < t.total) return toast('❌ Uang dibayar kurang dari total');
+  const inv = {
+    id: uid(), number: invoiceNumber(), date: new Date().toISOString(),
+    cashier: isAdmin() ? 'Admin' : 'Kasir', customer: $('#custName').value.trim(),
+    items: S.cart.map(r=>({...r})),
+    discType: t.discType, discVal: t.discVal, discount: t.discount,
+    taxPct: t.taxPct, tax: t.tax, subtotal: t.subtotal, total: t.total,
+    paid, change: paid - t.total,
+  };
+  await invPut(inv);
+  S.cart = []; S.cartDiscVal = 0;
+  toast('✅ Invoice ' + inv.number + ' tersimpan');
+  showReceipt(inv, true);
+  drawCart(); drawRecent();
+  $('#custName').value=''; $('#paidAmt').value='';
+}
+async function drawRecent(){
+  const box = $('#recentInv'); if(!box) return;
+  const all = await invAll();
+  const today = new Date().toDateString();
+  const rows = all.filter(i => new Date(i.date).toDateString() === today)
+                  .sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8);
+  box.innerHTML = rows.length ? `<div class="tablewrap"><table style="min-width:0">
+      <tr><th>No. Invoice</th><th>Jam</th><th>Pelanggan</th><th class="num">Total</th><th></th></tr>
+      ${rows.map(i=>`<tr><td><b>${esc(i.number)}</b></td><td>${tstr(i.date)}</td><td>${esc(i.customer)||'-'}</td>
+        <td class="num">${rp(i.total)}</td>
+        <td><button class="btn btn-sm" data-id="${i.id}">🖨️ Cetak</button></td></tr>`).join('')}
+    </table></div>` : '<div class="empty">Belum ada transaksi hari ini.</div>';
+  $$('#recentInv button').forEach(b => b.onclick = async () => {
+    const inv = (await invAll()).find(x=>x.id===b.dataset.id);
+    if(inv) showReceipt(inv, true);
+  });
+}
+function receiptHTML(inv){
+  const st = S.settings;
+  return `<div class="receipt">
+    <div class="c rname">${esc(st.cafeName||'Warung COGS')}</div>
+    ${st.address ? `<div class="c">${esc(st.address)}</div>`:''}
+    ${st.phone ? `<div class="c">Telp: ${esc(st.phone)}</div>`:''}
+    <hr>
+    <div class="rrow"><span>${esc(inv.number)}</span><span>${dstr(inv.date)} ${tstr(inv.date)}</span></div>
+    <div class="rrow"><span>Kasir: ${esc(inv.cashier)}</span><span>${inv.customer?'Plgn: '+esc(inv.customer):''}</span></div>
+    <hr>
+    ${inv.items.map(r=>`
+      <div>${esc(r.name)}</div>
+      <div class="rrow"><span>&nbsp;&nbsp;${r.qty} × ${fmt.format(r.price)}</span><span>${fmt.format(r.qty*r.price)}</span></div>`).join('')}
+    <hr>
+    <div class="rrow"><span>Subtotal</span><span>${fmt.format(Math.round(inv.subtotal))}</span></div>
+    ${inv.discount ? `<div class="rrow"><span>Diskon</span><span>-${fmt.format(Math.round(inv.discount))}</span></div>`:''}
+    ${inv.tax ? `<div class="rrow"><span>Pajak ${inv.taxPct}%</span><span>${fmt.format(Math.round(inv.tax))}</span></div>`:''}
+    <div class="rrow" style="font-weight:800;font-size:14px"><span>TOTAL</span><span>Rp ${fmt.format(Math.round(inv.total))}</span></div>
+    <div class="rrow"><span>Tunai</span><span>${fmt.format(Math.round(inv.paid))}</span></div>
+    <div class="rrow"><span>Kembali</span><span>${fmt.format(Math.round(inv.change))}</span></div>
+    <hr>
+    <div class="c">${esc(st.receiptNote||'Terima kasih atas kunjungan Anda! 🙏')}</div>
+  </div>`;
+}
+function showReceipt(inv, offerPrint){
+  openModal(`
+    <h2>🧾 Invoice ${esc(inv.number)}</h2>
+    <div style="border:1px solid var(--line);border-radius:10px;overflow:auto;max-height:60vh">${receiptHTML(inv)}</div>
+    <div class="actions">
+      <button class="btn" onclick="closeModal()">Tutup</button>
+      ${offerPrint?'<button class="btn btn-primary" id="doPrint">🖨️ Cetak</button>':''}
+    </div>`, 'narrow');
+  if(offerPrint) $('#doPrint').onclick = () => {
+    $('#printArea').innerHTML = receiptHTML(inv);
+    window.print();
+  };
+}
+
+/* =================== DASHBOARD =================== */
+async function renderDashboard(){
+  if(!requireAdmin()) return renderAll();
+  const oh = overheadCalc();
+  const all = await invAll();
+  const now = new Date();
+  const thisMonth = all.filter(i => { const d = new Date(i.date); return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear(); });
+  const omzet = thisMonth.reduce((a,i)=>a+i.total,0);
+  const hpp = thisMonth.reduce((a,i)=>a+i.items.reduce((x,r)=>x+(r.cost||0)*r.qty,0),0);
+  const o = S.overhead;
+  $('#main').innerHTML = `
+    <div class="pagehead"><h1>📊 Dashboard &amp; Overhead</h1>
+      <div class="sub">Semua menu otomatis memakai nilai overhead di bawah ini — sama seperti sheet <i>Overview</i> di Excel.</div></div>
+    <div class="grid stats">
+      <div class="stat"><div class="lab">Omzet Bulan Ini</div><div class="val">${rp(omzet)}</div><div class="note">${thisMonth.length} transaksi</div></div>
+      <div class="stat"><div class="lab">Laba Kotor Bulan Ini</div><div class="val">${rp(omzet-hpp)}</div><div class="note">omzet − HPP terjual</div></div>
+      <div class="stat"><div class="lab">Menu Aktif</div><div class="val">${S.products.filter(p=>p.active!==false).length}</div><div class="note">${S.materials.length} bahan baku</div></div>
+      <div class="stat"><div class="lab">Overhead / Porsi</div><div class="val">${rp(oh.total)}</div><div class="note">gaji ${rp(oh.labor)} + utilitas ${rp(oh.util)}</div></div>
+    </div>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+      <div class="card">
+        <h2>👥 Biaya Tenaga Kerja (Labor)</h2>
+        <div class="field"><label>Total Gaji Bulanan Semua Staff (Rp)</label>
+          <input type="number" id="ohSalary" value="${o.monthlySalary}" min="0" step="any">
+          <div class="hint">Contoh: 10 staff × Rp 1.000.000</div></div>
+        <div class="field"><label>Total Produksi Bulanan (porsi)</label>
+          <input type="number" id="ohPortions" value="${o.monthlyPortions}" min="0" step="any">
+          <div class="hint">Perkiraan seluruh porsi terjual per bulan</div></div>
+        <div class="totrow"><span>Labor Cost per Porsi</span><b id="ohLaborOut">${rp(oh.labor)}</b></div>
+      </div>
+      <div class="card">
+        <h2>💡 Biaya Utilitas (Utilities)</h2>
+        <div class="frow c2">
+          <div class="field"><label>Listrik (Rp/bln)</label><input type="number" id="ohElec" value="${o.electricity}" min="0" step="any"></div>
+          <div class="field"><label>Air (Rp/bln)</label><input type="number" id="ohWater" value="${o.water}" min="0" step="any"></div>
+          <div class="field"><label>Gas (Rp/bln)</label><input type="number" id="ohGas" value="${o.gas}" min="0" step="any"></div>
+          <div class="field"><label>Lainnya — wifi, kebersihan (Rp/bln)</label><input type="number" id="ohOther" value="${o.other}" min="0" step="any"></div>
+        </div>
+        <div class="totrow"><span>Total Utilitas / Bulan</span><b id="ohUtilTotOut">${rp(oh.utilTotal)}</b></div>
+        <div class="totrow"><span>Utilitas per Porsi</span><b id="ohUtilOut">${rp(oh.util)}</b></div>
+      </div>
+    </div>
+    <div class="card" style="background:var(--green-light);border-color:#c9e0d4">
+      <h2>Σ Ringkasan Overhead per Porsi</h2>
+      <div class="totrow"><span>Labor Cost per Porsi</span><b id="sumLabor">${rp(oh.labor)}</b></div>
+      <div class="totrow"><span>Utilities Cost per Porsi</span><b id="sumUtil">${rp(oh.util)}</b></div>
+      <div class="totrow grand"><span>TOTAL OVERHEAD per Porsi</span><span id="sumTotal">${rp(oh.total)}</span></div>
+      <div class="hint" style="margin-top:8px">💾 Perubahan tersimpan otomatis dan langsung menghitung ulang COGS semua menu.</div>
+    </div>`;
+  const bind = (id, key) => { $(id).oninput = e => { S.overhead[key] = num(e.target.value); saveOverhead(); refreshOh(); }; };
+  bind('#ohSalary','monthlySalary'); bind('#ohPortions','monthlyPortions');
+  bind('#ohElec','electricity'); bind('#ohWater','water'); bind('#ohGas','gas'); bind('#ohOther','other');
+  function refreshOh(){
+    const c = overheadCalc();
+    $('#ohLaborOut').textContent = rp(c.labor);
+    $('#ohUtilTotOut').textContent = rp(c.utilTotal);
+    $('#ohUtilOut').textContent = rp(c.util);
+    $('#sumLabor').textContent = rp(c.labor);
+    $('#sumUtil').textContent = rp(c.util);
+    $('#sumTotal').textContent = rp(c.total);
+  }
+}
+
+/* =================== BAHAN BAKU =================== */
+function renderMaterials(q){
+  if(!requireAdmin()) return renderAll();
+  $('#main').innerHTML = `
+    <div class="pagehead"><h1>📦 Bahan Baku</h1><div class="spacer"></div>
+      <button class="btn btn-primary" id="addMat">＋ Tambah Bahan</button>
+      <div class="sub">Harga satuan = harga beli ÷ isi kemasan. Mengubah harga di sini otomatis memperbarui COGS semua resep.</div></div>
+    <div class="searchbar"><input id="matSearch" placeholder="🔍 Cari bahan…" value="${esc(q||'')}"></div>
+    <div class="tablewrap"><table>
+      <tr><th>ID</th><th>Nama Bahan</th><th>Kategori</th><th>Satuan</th><th class="num">Harga Beli</th><th class="num">Isi Kemasan</th><th class="num">Harga / Satuan</th><th>Aksi</th></tr>
+      <tbody id="matRows"></tbody>
+    </table></div>`;
+  const draw = () => {
+    const query = ($('#matSearch').value||'').toLowerCase();
+    const list = S.materials.filter(m => !query || m.name.toLowerCase().includes(query) || String(m.category).toLowerCase().includes(query));
+    $('#matRows').innerHTML = list.length ? list.map(m=>`
+      <tr><td>${m.id}</td><td><b>${esc(m.name)}</b></td><td><span class="pill gray">${esc(m.category)}</span></td><td>${esc(m.unit)}</td>
+        <td class="num">${rp(m.purchasePrice)}</td><td class="num">${fmt.format(m.packageSize)} ${esc(m.unit)}</td>
+        <td class="num"><b>${rp2(matUnitCost(m))}</b></td>
+        <td style="white-space:nowrap"><button class="btn btn-sm" data-e="${m.id}">✏️ Edit</button>
+            <button class="btn btn-sm btn-danger" data-d="${m.id}">🗑️</button></td></tr>`).join('')
+      : '<tr><td colspan="8" class="empty">Tidak ada bahan.</td></tr>';
+    $$('#matRows [data-e]').forEach(b => b.onclick = () => materialModal(+b.dataset.e));
+    $$('#matRows [data-d]').forEach(b => b.onclick = () => deleteMaterial(+b.dataset.d));
+  };
+  $('#matSearch').oninput = draw;
+  $('#addMat').onclick = () => materialModal(null);
+  draw();
+}
+function materialModal(id){
+  const m = id != null ? S.materials.find(x=>x.id===id) : null;
+  openModal(`
+    <h2>${m?'✏️ Edit Bahan':'＋ Tambah Bahan Baku'}</h2>
+    <div class="frow c2">
+      <div class="field"><label>Nama Bahan *</label><input id="mName" value="${esc(m?.name||'')}" placeholder="cth: Ayam Segar"></div>
+      <div class="field"><label>Kategori</label><input id="mCat" value="${esc(m?.category||'')}" placeholder="cth: Protein" list="catList">
+        <datalist id="catList">${[...new Set(S.materials.map(x=>x.category))].map(c=>`<option value="${esc(c)}">`).join('')}</datalist></div>
+      <div class="field"><label>Satuan</label><input id="mUnit" value="${esc(m?.unit||'Kg')}" placeholder="Kg / Liter / Butir"></div>
+      <div class="field"><label>Harga Beli per Kemasan (Rp) *</label><input id="mPrice" type="number" min="0" step="any" value="${m?.purchasePrice??''}" placeholder="180000"></div>
+      <div class="field"><label>Isi Kemasan *</label><input id="mSize" type="number" min="0" step="any" value="${m?.packageSize??''}" placeholder="50">
+        <div class="hint">cth: 1 karung = 50 Kg → isi 50</div></div>
+      <div class="field"><label>Harga per Satuan (otomatis)</label><input id="mUnitCost" readonly style="background:var(--green-light);font-weight:700"></div>
+    </div>
+    <div class="actions"><button class="btn" onclick="closeModal()">Batal</button>
+      <button class="btn btn-primary" id="mSave">💾 Simpan</button></div>`);
+  const upd = () => { $('#mUnitCost').value = rp2(num($('#mSize').value)>0 ? num($('#mPrice').value)/num($('#mSize').value) : 0); };
+  $('#mPrice').oninput = upd; $('#mSize').oninput = upd; upd();
+  $('#mSave').onclick = async () => {
+    if(!requireAdmin()) return;
+    const name = $('#mName').value.trim();
+    if(!name) return toast('Nama bahan wajib diisi');
+    const rec = {
+      id: m ? m.id : (Math.max(0,...S.materials.map(x=>x.id))+1),
+      name, category: $('#mCat').value.trim()||'Lainnya', unit: $('#mUnit').value.trim()||'Unit',
+      purchasePrice: num($('#mPrice').value), packageSize: num($('#mSize').value),
+    };
+    if(m) Object.assign(m, rec); else S.materials.push(rec);
+    await saveMaterials(); closeModal(); renderMaterials(); toast('✅ Bahan tersimpan');
+  };
+}
+async function deleteMaterial(id){
+  if(!requireAdmin()) return;
+  const used = S.products.filter(p => (p.ingredients||[]).some(i=>i.materialId===id));
+  const m = S.materials.find(x=>x.id===id);
+  const warn = used.length ? `\n\n⚠️ Bahan ini dipakai di ${used.length} resep (${used.map(p=>p.name).join(', ')}). Resep tersebut akan kehilangan bahan ini.` : '';
+  if(!confirm(`Hapus bahan "${m.name}"?${warn}`)) return;
+  S.materials = S.materials.filter(x=>x.id!==id);
+  S.products.forEach(p => p.ingredients = (p.ingredients||[]).filter(i=>i.materialId!==id));
+  await saveMaterials(); await saveProducts();
+  renderMaterials(); toast('🗑️ Bahan dihapus');
+}
+
+/* =================== MENU / RESEP / COGS =================== */
+function renderProducts(){
+  if(!requireAdmin()) return renderAll();
+  const oh = overheadCalc();
+  $('#main').innerHTML = `
+    <div class="pagehead"><h1>🍳 Menu, Resep &amp; COGS</h1><div class="spacer"></div>
+      <button class="btn btn-primary" id="addProd">＋ Tambah Menu</button>
+      <div class="sub">COGS = bahan + overhead (${rp(oh.total)}/porsi). Harga saran = COGS ÷ (1 − margin). Kasir hanya melihat <b>Harga Jual</b>.</div></div>
+    <div class="searchbar"><input id="prodSearch" placeholder="🔍 Cari menu…">
+      <select id="prodCatF"><option>Semua</option><option>Makanan</option><option>Minuman</option><option>Lainnya</option></select></div>
+    <div class="tablewrap"><table style="min-width:900px">
+      <tr><th>Menu</th><th>Kategori</th><th class="num">Bahan (Rp)</th><th class="num">Labor</th><th class="num">Utilitas</th>
+          <th class="num">Total COGS</th><th class="num">Margin</th><th class="num">Harga Saran</th><th class="num">Harga Jual</th><th class="num">Laba/Unit</th><th>Status</th><th>Aksi</th></tr>
+      <tbody id="prodRows"></tbody>
+    </table></div>`;
+  const draw = () => {
+    const q = ($('#prodSearch').value||'').toLowerCase();
+    const cat = $('#prodCatF').value;
+    const list = S.products.filter(p => (!q || p.name.toLowerCase().includes(q)) && (cat==='Semua' || p.category===cat));
+    $('#prodRows').innerHTML = list.length ? list.map(p => {
+      const c = productCost(p);
+      const rec = recommendedPrice(c.total, p.marginPct);
+      const profit = (+p.sellPrice||0) - c.total;
+      return `<tr>
+        <td><b>${esc(p.name)}</b>${p.type==='simple'?' <span class="pill gray">beli jadi</span>':''}</td>
+        <td><span class="pill">${esc(p.category)}</span></td>
+        <td class="num">${rp2(c.raw)}</td><td class="num">${rp(c.labor)}</td><td class="num">${rp(c.util)}</td>
+        <td class="num"><b>${rp2(c.total)}</b></td>
+        <td class="num">${p.marginPct||0}%</td>
+        <td class="num">${rp2(rec)}</td>
+        <td class="num"><b style="color:var(--green)">${rp(p.sellPrice)}</b></td>
+        <td class="num"><span class="pill ${profit>=0?'':'red'}">${rp(profit)}</span></td>
+        <td>${p.active!==false?'<span class="pill">aktif</span>':'<span class="pill red">nonaktif</span>'}</td>
+        <td style="white-space:nowrap"><button class="btn btn-sm" data-e="${p.id}">✏️ Edit</button>
+            <button class="btn btn-sm btn-danger" data-d="${p.id}">🗑️</button></td></tr>`;
+    }).join('') : '<tr><td colspan="12" class="empty">Belum ada menu.</td></tr>';
+    $$('#prodRows [data-e]').forEach(b => b.onclick = () => productModal(b.dataset.e));
+    $$('#prodRows [data-d]').forEach(b => b.onclick = () => deleteProduct(b.dataset.d));
+  };
+  $('#prodSearch').oninput = draw; $('#prodCatF').onchange = draw;
+  $('#addProd').onclick = () => productModal(null);
+  draw();
+}
+function productModal(id){
+  const p = id ? S.products.find(x=>x.id===id) : null;
+  const draft = p ? JSON.parse(JSON.stringify(p)) : {
+    id:'p'+uid(), name:'', category:'Makanan', type:'recipe', includeOverhead:true,
+    marginPct:30, sellPrice:0, simpleCost:0, active:true, ingredients:[],
+  };
+  openModal(`
+    <h2>${p?'✏️ Edit Menu':'＋ Tambah Menu Baru'}</h2>
+    <div class="frow c3">
+      <div class="field" style="grid-column:span 2"><label>Nama Menu *</label><input id="pName" value="${esc(draft.name)}" placeholder="cth: Nasi Goreng Spesial"></div>
+      <div class="field"><label>Kategori</label>
+        <select id="pCat">${['Makanan','Minuman','Lainnya'].map(c=>`<option${draft.category===c?' selected':''}>${c}</option>`).join('')}</select></div>
+    </div>
+    <div class="frow c3">
+      <div class="field"><label>Jenis Produk</label>
+        <select id="pType"><option value="recipe"${draft.type==='recipe'?' selected':''}>Diracik (pakai resep)</option><option value="simple"${draft.type==='simple'?' selected':''}>Beli jadi (tanpa resep)</option></select></div>
+      <div class="field" id="simpleCostBox"><label>Harga Modal / Unit (Rp)</label><input id="pSimpleCost" type="number" min="0" step="any" value="${draft.simpleCost||0}"></div>
+      <div class="field"><label>Bebankan Overhead?</label>
+        <select id="pOH"><option value="1"${draft.includeOverhead?' selected':''}>Ya (+ gaji &amp; utilitas)</option><option value="0"${!draft.includeOverhead?' selected':''}>Tidak</option></select></div>
+    </div>
+    <div id="recipeBox">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin:4px 0 8px">
+        <b style="font-size:13.5px">🥕 Resep — bahan per 1 porsi</b>
+        <button class="btn btn-sm" id="addIng">＋ Bahan</button>
+      </div>
+      <div class="tablewrap"><table style="min-width:0">
+        <tr><th>Bahan</th><th class="num" style="width:110px">Qty / porsi</th><th>Satuan</th><th class="num">Biaya</th><th></th></tr>
+        <tbody id="ingRows"></tbody>
+      </table></div>
+    </div>
+    <div class="card" style="margin:14px 0;background:var(--green-light);border-color:#c9e0d4;padding:12px 16px">
+      <div class="totrow"><span>Biaya Bahan / Modal</span><b id="cRaw">—</b></div>
+      <div class="totrow"><span>Overhead (labor + utilitas)</span><b id="cOH">—</b></div>
+      <div class="totrow grand" style="font-size:15px"><span>Total COGS / porsi</span><span id="cTotal">—</span></div>
+    </div>
+    <div class="frow c3">
+      <div class="field"><label>Margin Profit (%)</label><input id="pMargin" type="number" min="0" max="95" step="any" value="${draft.marginPct||0}"></div>
+      <div class="field"><label>Harga Saran (otomatis)</label><input id="pRec" readonly style="background:#fdf2df;font-weight:700"></div>
+      <div class="field"><label>Harga Jual (Rp) *</label>
+        <div style="display:flex;gap:6px"><input id="pSell" type="number" min="0" step="any" value="${draft.sellPrice||0}" style="flex:1">
+        <button class="btn btn-sm" id="useRec" title="Pakai harga saran, dibulatkan ke Rp500">⤵</button></div></div>
+    </div>
+    <div class="field"><label><input type="checkbox" id="pActive" ${draft.active!==false?'checked':''} style="width:auto;margin-right:6px">Tampilkan di layar Kasir</label></div>
+    <div class="actions"><button class="btn" onclick="closeModal()">Batal</button>
+      <button class="btn btn-primary" id="pSave">💾 Simpan Menu</button></div>`, 'wide');
+
+  const matOptions = sel => S.materials.map(m=>`<option value="${m.id}"${m.id===sel?' selected':''}>${esc(m.name)} (${rp2(matUnitCost(m))}/${esc(m.unit)})</option>`).join('');
+  function drawIngs(){
+    $('#ingRows').innerHTML = draft.ingredients.length ? draft.ingredients.map((ing,i)=>{
+      const m = S.materials.find(x=>x.id===ing.materialId);
+      return `<tr>
+        <td><select data-mi="${i}" style="width:100%;padding:6px;border:1px solid var(--line);border-radius:8px">${matOptions(ing.materialId)}</select></td>
+        <td class="num"><input data-qi="${i}" type="number" min="0" step="any" value="${ing.qty}" style="width:100px;padding:6px;border:1px solid var(--line);border-radius:8px;text-align:right"></td>
+        <td>${esc(m?m.unit:'?')}</td>
+        <td class="num">${rp2((+ing.qty||0)*matUnitCost(m))}</td>
+        <td><button class="btn btn-sm btn-danger" data-xi="${i}">✕</button></td></tr>`;
+    }).join('') : '<tr><td colspan="5" class="empty">Belum ada bahan — klik "＋ Bahan".</td></tr>';
+    $$('#ingRows [data-mi]').forEach(el => el.onchange = () => { draft.ingredients[+el.dataset.mi].materialId = +el.value; drawIngs(); });
+    $$('#ingRows [data-qi]').forEach(el => el.oninput = () => { draft.ingredients[+el.dataset.qi].qty = num(el.value); refreshCost(); });
+    $$('#ingRows [data-xi]').forEach(el => el.onclick = () => { draft.ingredients.splice(+el.dataset.xi,1); drawIngs(); });
+    refreshCost();
+  }
+  function syncDraft(){
+    draft.type = $('#pType').value;
+    draft.simpleCost = num($('#pSimpleCost').value);
+    draft.includeOverhead = $('#pOH').value === '1';
+    draft.marginPct = num($('#pMargin').value);
+    $('#recipeBox').style.display = draft.type==='recipe' ? '' : 'none';
+    $('#simpleCostBox').style.display = draft.type==='simple' ? '' : 'none';
+  }
+  function refreshCost(){
+    syncDraft();
+    const c = productCost(draft);
+    const rec = recommendedPrice(c.total, draft.marginPct);
+    $('#cRaw').textContent = rp2(c.raw);
+    $('#cOH').textContent = rp2(c.labor + c.util);
+    $('#cTotal').textContent = rp2(c.total);
+    $('#pRec').value = rp2(rec);
+    $('#pRec').dataset.raw = rec;
+  }
+  $('#pType').onchange = refreshCost; $('#pSimpleCost').oninput = refreshCost;
+  $('#pOH').onchange = refreshCost; $('#pMargin').oninput = refreshCost;
+  $('#addIng').onclick = () => {
+    if(!S.materials.length) return toast('Tambahkan bahan baku dulu');
+    draft.ingredients.push({materialId:S.materials[0].id, qty:0});
+    drawIngs();
+  };
+  $('#useRec').onclick = () => { $('#pSell').value = round500up(+($('#pRec').dataset.raw||0)); };
+  drawIngs(); syncDraft(); refreshCost();
+  $('#pSave').onclick = async () => {
+    if(!requireAdmin()) return;
+    syncDraft();
+    draft.name = $('#pName').value.trim();
+    draft.category = $('#pCat').value;
+    draft.sellPrice = num($('#pSell').value);
+    draft.active = $('#pActive').checked;
+    if(!draft.name) return toast('Nama menu wajib diisi');
+    if(draft.type==='recipe' && !draft.ingredients.length) return toast('Resep butuh minimal 1 bahan');
+    const i = S.products.findIndex(x=>x.id===draft.id);
+    i >= 0 ? S.products[i] = draft : S.products.push(draft);
+    await saveProducts(); closeModal(); renderProducts(); toast('✅ Menu tersimpan');
+  };
+}
+async function deleteProduct(id){
+  if(!requireAdmin()) return;
+  const p = S.products.find(x=>x.id===id);
+  if(!confirm(`Hapus menu "${p.name}"? Riwayat invoice lama tidak ikut terhapus.`)) return;
+  S.products = S.products.filter(x=>x.id!==id);
+  await saveProducts(); renderProducts(); toast('🗑️ Menu dihapus');
+}
+
+/* =================== LAPORAN =================== */
+async function renderReports(){
+  if(!requireAdmin()) return renderAll();
+  S.invoices = (await invAll()).sort((a,b)=>b.date.localeCompare(a.date));
+  const today = new Date();
+  const first = new Date(today.getFullYear(), today.getMonth(), 1);
+  const iso = d => d.toISOString().slice(0,10);
+  $('#main').innerHTML = `
+    <div class="pagehead"><h1>📈 Laporan Penjualan</h1>
+      <div class="sub">Semua invoice tersimpan permanen di perangkat ini. Ekspor rutin untuk cadangan.</div></div>
+    <div class="searchbar">
+      <label style="align-self:center;font-size:13px;font-weight:700;color:var(--muted)">Dari</label>
+      <input type="date" id="rFrom" value="${iso(first)}">
+      <label style="align-self:center;font-size:13px;font-weight:700;color:var(--muted)">s/d</label>
+      <input type="date" id="rTo" value="${iso(today)}">
+      <button class="btn btn-amber" id="rCsv">⬇️ Ekspor CSV</button>
+    </div>
+    <div class="grid stats" id="rStats"></div>
+    <div class="tablewrap"><table>
+      <tr><th>No. Invoice</th><th>Tanggal</th><th>Kasir</th><th>Pelanggan</th><th class="num">Item</th><th class="num">HPP</th><th class="num">Total</th><th class="num">Laba</th><th>Aksi</th></tr>
+      <tbody id="rRows"></tbody>
+    </table></div>`;
+  const filtered = () => {
+    const f = $('#rFrom').value, t = $('#rTo').value;
+    return S.invoices.filter(i => {
+      const d = i.date.slice(0,10);
+      return (!f || d >= f) && (!t || d <= t);
+    });
+  };
+  const draw = () => {
+    const list = filtered();
+    const omzet = list.reduce((a,i)=>a+i.total,0);
+    const hpp = list.reduce((a,i)=>a+i.items.reduce((x,r)=>x+(r.cost||0)*r.qty,0),0);
+    const items = list.reduce((a,i)=>a+i.items.reduce((x,r)=>x+r.qty,0),0);
+    $('#rStats').innerHTML = `
+      <div class="stat"><div class="lab">Transaksi</div><div class="val">${fmt.format(list.length)}</div><div class="note">${fmt.format(items)} item terjual</div></div>
+      <div class="stat"><div class="lab">Omzet</div><div class="val">${rp(omzet)}</div></div>
+      <div class="stat"><div class="lab">HPP Terjual</div><div class="val">${rp(hpp)}</div></div>
+      <div class="stat"><div class="lab">Laba Kotor</div><div class="val">${rp(omzet-hpp)}</div><div class="note">${omzet?Math.round((omzet-hpp)/omzet*100):0}% dari omzet</div></div>`;
+    $('#rRows').innerHTML = list.length ? list.map(i=>{
+      const c = i.items.reduce((x,r)=>x+(r.cost||0)*r.qty,0);
+      return `<tr><td><b>${esc(i.number)}</b></td><td>${dstr(i.date)} ${tstr(i.date)}</td><td>${esc(i.cashier)}</td><td>${esc(i.customer)||'-'}</td>
+        <td class="num">${i.items.reduce((x,r)=>x+r.qty,0)}</td><td class="num">${rp(c)}</td>
+        <td class="num"><b>${rp(i.total)}</b></td><td class="num">${rp(i.total-c)}</td>
+        <td style="white-space:nowrap"><button class="btn btn-sm" data-v="${i.id}">👁️</button>
+        <button class="btn btn-sm btn-danger" data-x="${i.id}">🗑️</button></td></tr>`;
+    }).join('') : '<tr><td colspan="9" class="empty">Tidak ada transaksi pada rentang tanggal ini.</td></tr>';
+    $$('#rRows [data-v]').forEach(b => b.onclick = () => showReceipt(S.invoices.find(x=>x.id===b.dataset.v), true));
+    $$('#rRows [data-x]').forEach(b => b.onclick = async () => {
+      if(!requireAdmin()) return;
+      if(!confirm('Hapus invoice ini dari riwayat?')) return;
+      await invDel(b.dataset.x);
+      S.invoices = S.invoices.filter(x=>x.id!==b.dataset.x);
+      draw(); toast('🗑️ Invoice dihapus');
+    });
+  };
+  $('#rFrom').onchange = draw; $('#rTo').onchange = draw;
+  $('#rCsv').onclick = () => {
+    const list = filtered();
+    const rows = [['No Invoice','Tanggal','Kasir','Pelanggan','Produk','Qty','Harga','Subtotal','HPP/unit']];
+    list.forEach(i => i.items.forEach(r => rows.push([i.number, i.date, i.cashier, i.customer, r.name, r.qty, r.price, r.price*r.qty, r.cost||0])));
+    const csv = rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(';')).join('\n');
+    download('laporan-penjualan.csv', '﻿'+csv, 'text/csv');
+  };
+  draw();
+}
+
+/* =================== PENGATURAN =================== */
+function renderSettings(){
+  if(!requireAdmin()) return renderAll();
+  const st = S.settings;
+  $('#main').innerHTML = `
+    <div class="pagehead"><h1>⚙️ Pengaturan</h1></div>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+      <div class="card">
+        <h2>🏪 Profil Usaha (tampil di struk)</h2>
+        <div class="field"><label>Nama Cafe / Restoran</label><input id="stName" value="${esc(st.cafeName||'')}"></div>
+        <div class="field"><label>Alamat</label><input id="stAddr" value="${esc(st.address||'')}"></div>
+        <div class="field"><label>No. Telepon</label><input id="stPhone" value="${esc(st.phone||'')}"></div>
+        <div class="field"><label>Catatan Kaki Struk</label><input id="stNote" value="${esc(st.receiptNote||'')}" placeholder="Terima kasih atas kunjungan Anda! 🙏"></div>
+        <div class="frow c2">
+          <div class="field"><label>Pajak Default (%)</label><input id="stTax" type="number" min="0" step="any" value="${st.taxPct||0}"></div>
+          <div class="field"><label>Maks. Diskon oleh Kasir (%)</label><input id="stDisc" type="number" min="0" max="100" step="any" value="${st.maxDiscKasir||0}">
+            <div class="hint">0 = kasir tidak boleh memberi diskon</div></div>
+        </div>
+        <button class="btn btn-primary" id="stSave">💾 Simpan Profil</button>
+      </div>
+      <div class="card">
+        <h2>🔐 Keamanan — PIN Admin</h2>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:10px">PIN melindungi harga, resep, dan laporan dari perubahan oleh kasir. Mode Admin terkunci otomatis setelah 5 menit tidak aktif.</p>
+        <div class="field"><label>PIN Lama</label><input type="password" id="pinOld" inputmode="numeric"></div>
+        <div class="field"><label>PIN Baru (min. 4 digit)</label><input type="password" id="pinNew" inputmode="numeric"></div>
+        <div class="field"><label>Ulangi PIN Baru</label><input type="password" id="pinNew2" inputmode="numeric"></div>
+        <button class="btn btn-primary" id="pinChange">🔑 Ganti PIN</button>
+      </div>
+      <div class="card">
+        <h2>💾 Cadangan &amp; Data</h2>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:10px">Data tersimpan di perangkat ini (IndexedDB — mampu menampung ratusan ribu transaksi). Untuk memindahkan data ke perangkat lain, ekspor lalu impor di perangkat tujuan.</p>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button class="btn btn-amber" id="expJson">⬇️ Ekspor Semua Data (JSON)</button>
+          <button class="btn" id="impJson">⬆️ Impor Data dari File</button>
+          <input type="file" id="impFile" accept=".json,application/json" style="display:none">
+          <button class="btn" id="reDemo">🎬 Muat Ulang Data Demo</button>
+          <button class="btn btn-danger" id="wipe">🗑️ Hapus SEMUA Data</button>
+        </div>
+      </div>
+    </div>`;
+  $('#stSave').onclick = async () => {
+    if(!requireAdmin()) return;
+    Object.assign(st, {
+      cafeName: $('#stName').value.trim(), address: $('#stAddr').value.trim(),
+      phone: $('#stPhone').value.trim(), receiptNote: $('#stNote').value.trim(),
+      taxPct: num($('#stTax').value), maxDiscKasir: num($('#stDisc').value),
+    });
+    await saveSettings(); renderNav(); toast('✅ Profil tersimpan');
+  };
+  $('#pinChange').onclick = async () => {
+    if(!requireAdmin()) return;
+    const oldH = await sha256($('#pinOld').value);
+    if(oldH !== st.pinHash) return toast('❌ PIN lama salah');
+    const p1 = $('#pinNew').value, p2 = $('#pinNew2').value;
+    if(p1.length < 4) return toast('PIN baru minimal 4 karakter');
+    if(p1 !== p2) return toast('❌ PIN baru tidak sama');
+    st.pinHash = await sha256(p1);
+    await saveSettings(); toast('✅ PIN berhasil diganti');
+    $('#pinOld').value = $('#pinNew').value = $('#pinNew2').value = '';
+  };
+  $('#expJson').onclick = async () => {
+    const data = {
+      app:'warung-cogs', version:1, exportedAt:new Date().toISOString(),
+      settings:S.settings, overhead:S.overhead, materials:S.materials, products:S.products,
+      invoices: await invAll(),
+    };
+    download(`backup-warung-cogs-${new Date().toISOString().slice(0,10)}.json`, JSON.stringify(data,null,1), 'application/json');
+    toast('⬇️ Backup diunduh');
+  };
+  $('#impJson').onclick = () => $('#impFile').click();
+  $('#impFile').onchange = async e => {
+    const f = e.target.files[0]; if(!f) return;
+    try{
+      const data = JSON.parse(await f.text());
+      if(data.app !== 'warung-cogs') throw new Error('bukan file backup Warung COGS');
+      if(!confirm('Impor akan MENGGANTI seluruh data di perangkat ini dengan isi file backup. Lanjutkan?')) return;
+      S.settings = data.settings; S.overhead = data.overhead;
+      S.materials = data.materials||[]; S.products = data.products||[];
+      await saveAll(); await invClear();
+      for(const iv of (data.invoices||[])) await invPut(iv);
+      renderAll(); toast('✅ Data berhasil diimpor');
+    }catch(err){ toast('❌ Gagal impor: ' + err.message); }
+    e.target.value = '';
+  };
+  $('#reDemo').onclick = async () => {
+    if(!confirm('Muat ulang data demo? Bahan, menu, overhead & contoh invoice akan DIGANTI dengan data demo.')) return;
+    await seedDemo(true); renderAll(); toast('🎬 Data demo dimuat');
+  };
+  $('#wipe').onclick = async () => {
+    if(!confirm('HAPUS SEMUA DATA — bahan, menu, invoice, pengaturan? Tindakan ini tidak bisa dibatalkan!')) return;
+    if(!confirm('Yakin? Pastikan Anda sudah mengekspor backup.')) return;
+    S.materials = []; S.products = [];
+    S.overhead = {monthlySalary:0, monthlyPortions:0, electricity:0, water:0, gas:0, other:0};
+    S.settings = await freshSettings();
+    await saveAll(); await invClear();
+    lockToKasir(); toast('🗑️ Semua data dihapus. PIN kembali ke 1234.');
+  };
+}
+function download(name, content, mime){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], {type:mime}));
+  a.download = name;
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 3000);
+}
+
+/* ---------- init ---------- */
+async function freshSettings(){
+  return { cafeName:'Cafe Combe Martin', address:'Jl. Contoh No. 1', phone:'',
+           receiptNote:'Terima kasih atas kunjungan Anda! 🙏',
+           taxPct:0, maxDiscKasir:0, invSeq:{}, pinHash: await sha256(DEFAULT_PIN) };
+}
+async function init(){
+  await dbOpen();
+  S.settings = await kvGet('settings');
+  S.overhead = await kvGet('overhead');
+  S.materials = await kvGet('materials');
+  S.products = await kvGet('products');
+  const firstRun = !S.settings;
+  if(firstRun){
+    S.settings = await freshSettings();
+    await seedDemo(true);
+    await saveSettings();
+  }
+  S.materials = S.materials || []; S.products = S.products || [];
+  S.overhead = S.overhead || {monthlySalary:0, monthlyPortions:0, electricity:0, water:0, gas:0, other:0};
+  renderAll();
+  if(firstRun) setTimeout(()=>toast('👋 Selamat datang! Data demo sudah dimuat. PIN Admin: 1234'), 400);
+}
+init();
+</script>
+</body>
+</html>
