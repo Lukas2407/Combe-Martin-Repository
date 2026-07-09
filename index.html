@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Warung COGS — Kalkulator HPP &amp; Kasir Restoran</title>
 <meta name="theme-color" content="#153f30">
 <meta name="mobile-web-app-capable" content="yes">
@@ -142,25 +142,90 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
   #printArea{display:block;position:absolute;left:0;top:0;width:100%}
 }
 
+/* mobile top bar & floating cart button (hidden on desktop) */
+.mtop{display:none}
+.cartfab{display:none}
+.mclose{display:none}
+
 /* responsive */
-@media(max-width:980px){
+@media(max-width:980px) and (min-width:821px){
   .pos{grid-template-columns:1fr}
   .cart{position:static}
 }
+/* ---------- tata letak HP: app-like ---------- */
 @media(max-width:820px){
+  body{font-size:14.5px}
   .app{flex-direction:column}
-  .sidebar{width:100%;height:auto;position:static;flex-direction:column}
-  .nav{display:flex;overflow-x:auto;padding:8px}
-  .nav button{width:auto;white-space:nowrap;margin:0 4px 0 0}
-  .nav .sep{display:none}
-  .rolebox{display:flex;align-items:center;gap:10px;padding:10px 14px}
-  .rolebox .rolechip{margin:0}
-  .rolebox button{width:auto}
+
+  /* header atas ramping */
+  .mtop{display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:40;
+    background:var(--green-dark);color:#fff;padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top))}
+  .mtop .mlogo{font-size:20px}
+  .mtop .mname{flex:1;font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mtop .rolechip{margin:0}
+  .mtop button{border:1px solid rgba(255,255,255,.3);background:none;color:#fff;border-radius:9px;padding:6px 10px;font-size:15px}
+
+  /* navigasi pindah ke bawah, seperti aplikasi native */
+  .sidebar{position:fixed;left:0;right:0;bottom:0;top:auto;width:100%;height:auto;z-index:40;
+    flex-direction:row;box-shadow:0 -3px 14px rgba(0,0,0,.25)}
+  .brand,.rolebox,.nav .sep{display:none}
+  .nav{display:flex;flex:1;overflow-x:auto;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+  .nav button{flex:1;min-width:56px;flex-direction:column;gap:2px;margin:0 2px;padding:7px 2px;
+    font-size:10px;font-weight:600;white-space:nowrap;text-align:center;align-items:center;justify-content:center;border-radius:12px}
+  .nav button .nico{font-size:19px;line-height:1}
+
+  .main{padding:14px 12px 150px}
+  .pagehead h1{font-size:18px}
+  .pagehead .sub{font-size:12.5px}
+  .card{padding:14px;border-radius:12px}
+  .grid.stats{grid-template-columns:1fr 1fr;gap:10px}
+  .stat .val{font-size:17px}
   .frow.c2,.frow.c3{grid-template-columns:1fr}
+
+  /* cegah zoom otomatis iOS & target sentuh besar */
+  input,select,textarea{font-size:16px}
+  .btn{padding:11px 16px}
+  .btn-sm{padding:8px 11px;font-size:13px}
+  .qtybtn{width:34px;height:34px;border-radius:10px}
+
+  /* tabel muat layar: kolom sekunder disembunyikan, tanpa geser horizontal */
+  .hide-m{display:none!important}
+  .tablewrap table{min-width:0!important;font-size:12.5px}
+  th,td{padding:8px 8px}
+
+  /* kasir: grid produk 2 kolom, keranjang jadi panel bawah */
+  .pos{grid-template-columns:1fr}
+  .prodgrid{grid-template-columns:repeat(2,1fr)}
+  .prodcard{padding:12px 10px}
+  .cart{display:none;position:fixed;left:0;right:0;bottom:0;top:auto;z-index:46;margin:0;
+    border-radius:18px 18px 0 0;max-height:88vh;overflow-y:auto;box-shadow:0 -10px 34px rgba(0,0,0,.35);
+    padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+  .cart.open{display:block}
+  .cartitems{max-height:26vh}
+  .mclose{display:inline-flex}
+
+  /* tombol keranjang melayang */
+  .cartfab{display:flex;justify-content:space-between;align-items:center;gap:10px;position:fixed;
+    left:14px;right:14px;bottom:calc(66px + env(safe-area-inset-bottom));z-index:44;
+    background:var(--green);color:#fff;border:0;border-radius:14px;padding:13px 18px;
+    font-weight:800;font-size:14.5px;box-shadow:0 6px 20px rgba(20,60,40,.4)}
+
+  /* modal jadi lembar bawah */
+  .overlay{padding:0;align-items:flex-end}
+  .modal{max-width:100%;border-radius:18px 18px 0 0;max-height:92vh;overflow-y:auto;
+    padding-bottom:calc(22px + env(safe-area-inset-bottom))}
+
+  #toast{bottom:calc(84px + env(safe-area-inset-bottom))}
 }
 </style>
 </head>
 <body>
+<header class="mtop">
+  <span class="mlogo">🍽️</span>
+  <div class="mname" id="brandNameM">Warung COGS</div>
+  <span class="rolechip" id="roleChipM">Kasir</span>
+  <button id="roleBtnM" title="Ganti mode">🔓</button>
+</header>
 <div class="app" id="appRoot">
   <aside class="sidebar">
     <div class="brand">
@@ -497,12 +562,12 @@ $('#overlay').addEventListener('click', e => { if(e.target.id === 'overlay') clo
 
 /* ---------- navigasi ---------- */
 const TABS = {
-  kasir:     {icon:'🧾', label:'Kasir / Invoice', admin:false},
-  dashboard: {icon:'📊', label:'Dashboard & Overhead', admin:true},
-  materials: {icon:'📦', label:'Bahan Baku', admin:true},
-  products:  {icon:'🍳', label:'Menu, Resep & COGS', admin:true},
-  reports:   {icon:'📈', label:'Laporan Penjualan', admin:true},
-  settings:  {icon:'⚙️', label:'Pengaturan', admin:true},
+  kasir:     {icon:'🧾', label:'Kasir / Invoice', short:'Kasir', admin:false},
+  dashboard: {icon:'📊', label:'Dashboard & Overhead', short:'Overhead', admin:true},
+  materials: {icon:'📦', label:'Bahan Baku', short:'Bahan', admin:true},
+  products:  {icon:'🍳', label:'Menu, Resep & COGS', short:'Menu', admin:true},
+  reports:   {icon:'📈', label:'Laporan Penjualan', short:'Laporan', admin:true},
+  settings:  {icon:'⚙️', label:'Pengaturan', short:'Atur', admin:true},
 };
 function renderNav(){
   const nav = $('#nav');
@@ -510,17 +575,30 @@ function renderNav(){
   for(const [key,t] of Object.entries(TABS)){
     if(t.admin && !isAdmin()) continue;
     if(key === 'dashboard') html += '<div class="sep">Admin</div>';
-    html += `<button data-tab="${key}" class="${S.tab===key?'active':''}">${t.icon} ${t.label}</button>`;
+    html += `<button data-tab="${key}" class="${S.tab===key?'active':''}"><span class="nico">${t.icon}</span><span class="nlab">${window.innerWidth<=820?t.short:t.label}</span></button>`;
   }
   nav.innerHTML = html;
   $$('#nav button').forEach(b => b.onclick = () => { S.tab = b.dataset.tab; renderAll(); });
+  const toggleRole = () => { if(isAdmin()){ lockToKasir(); toast('🔒 Kembali ke mode Kasir'); } else askPin(); };
   const chip = $('#roleChip'), btn = $('#roleBtn');
   chip.textContent = isAdmin() ? '⭐ Mode Admin' : '👤 Mode Kasir';
   chip.className = 'rolechip' + (isAdmin() ? ' admin' : '');
   btn.textContent = isAdmin() ? '🔒 Kunci (kembali ke Kasir)' : '🔓 Masuk Admin';
-  btn.onclick = () => { if(isAdmin()){ lockToKasir(); toast('🔒 Kembali ke mode Kasir'); } else askPin(); };
-  $('#brandName').textContent = S.settings.cafeName || 'Warung COGS';
+  btn.onclick = toggleRole;
+  // header versi HP
+  const chipM = $('#roleChipM'), btnM = $('#roleBtnM');
+  chipM.textContent = isAdmin() ? '⭐ Admin' : '👤 Kasir';
+  chipM.className = 'rolechip' + (isAdmin() ? ' admin' : '');
+  btnM.textContent = isAdmin() ? '🔒' : '🔓';
+  btnM.onclick = toggleRole;
+  $('#brandName').textContent = $('#brandNameM').textContent = S.settings.cafeName || 'Warung COGS';
 }
+let _lastW = window.innerWidth;
+window.addEventListener('resize', () => {
+  const m1 = _lastW <= 820, m2 = window.innerWidth <= 820;
+  _lastW = window.innerWidth;
+  if(m1 !== m2) renderAll();
+});
 function renderAll(){
   renderNav();
   const t = TABS[S.tab];
@@ -548,7 +626,7 @@ function renderKasir(){
         </div>
       </div>
       <div class="card cart">
-        <h2>🛒 Keranjang</h2>
+        <h2 style="justify-content:space-between">🛒 Keranjang <button class="btn btn-sm mclose" id="closeCart">✕ Tutup</button></h2>
         <div class="cartitems" id="cartItems"></div>
         <div class="field"><label>Nama Pelanggan / Meja (opsional)</label><input id="custName" placeholder="cth: Meja 3"></div>
         <div class="frow c2">
@@ -574,7 +652,8 @@ function renderKasir(){
           <button class="btn btn-primary" style="flex:2" id="saveInv">💾 Simpan &amp; Cetak</button>
         </div>
       </div>
-    </div>`;
+    </div>
+    <button class="cartfab" id="cartFab"><span>🛒 Keranjang</span><span>Rp 0</span></button>`;
   const draw = () => drawProdGrid($('#posSearch').value, $('#posCat').value);
   $('#posSearch').oninput = draw; $('#posCat').onchange = draw;
   draw(); drawCart(); drawRecent();
@@ -585,6 +664,8 @@ function renderKasir(){
   $('#exactBtn').onclick = () => { $('#paidAmt').value = Math.round(cartTotals().total); updateChange(); };
   $('#clearCart').onclick = () => { S.cart = []; S.cartDiscVal = 0; renderKasir(); };
   $('#saveInv').onclick = saveInvoice;
+  $('#cartFab').onclick = () => $('.cart').classList.add('open');
+  $('#closeCart').onclick = () => $('.cart').classList.remove('open');
 }
 function drawProdGrid(q, cat){
   const list = S.products.filter(p => p.active !== false)
@@ -643,6 +724,11 @@ function drawCart(keep){
     <div class="totrow"><span>Diskon</span><b>− ${rp(t.discount)}</b></div>
     <div class="totrow"><span>Pajak (${t.taxPct||0}%)</span><b>${rp(t.tax)}</b></div>
     <div class="totrow grand"><span>TOTAL</span><span>${rp(t.total)}</span></div>`;
+  const fab = $('#cartFab');
+  if(fab){
+    const n = S.cart.reduce((a,r)=>a+r.qty,0);
+    fab.innerHTML = `<span>🛒 ${n ? n+' item' : 'Keranjang kosong'}</span><span>${rp(t.total)} ›</span>`;
+  }
   updateChange();
 }
 function updateChange(){
@@ -667,6 +753,7 @@ async function saveInvoice(){
   };
   await invPut(inv);
   S.cart = []; S.cartDiscVal = 0;
+  $('.cart').classList.remove('open');
   toast('✅ Invoice ' + inv.number + ' tersimpan');
   showReceipt(inv, true);
   drawCart(); drawRecent();
@@ -679,8 +766,8 @@ async function drawRecent(){
   const rows = all.filter(i => new Date(i.date).toDateString() === today)
                   .sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8);
   box.innerHTML = rows.length ? `<div class="tablewrap"><table style="min-width:0">
-      <tr><th>No. Invoice</th><th>Jam</th><th>Pelanggan</th><th class="num">Total</th><th></th></tr>
-      ${rows.map(i=>`<tr><td><b>${esc(i.number)}</b></td><td>${tstr(i.date)}</td><td>${esc(i.customer)||'-'}</td>
+      <tr><th>No. Invoice</th><th>Jam</th><th class="hide-m">Pelanggan</th><th class="num">Total</th><th></th></tr>
+      ${rows.map(i=>`<tr><td><b>${esc(i.number)}</b></td><td>${tstr(i.date)}</td><td class="hide-m">${esc(i.customer)||'-'}</td>
         <td class="num">${rp(i.total)}</td>
         <td><button class="btn btn-sm" data-id="${i.id}">🖨️ Cetak</button></td></tr>`).join('')}
     </table></div>` : '<div class="empty">Belum ada transaksi hari ini.</div>';
@@ -799,16 +886,16 @@ function renderMaterials(q){
       <div class="sub">Harga satuan = harga beli ÷ isi kemasan. Mengubah harga di sini otomatis memperbarui COGS semua resep.</div></div>
     <div class="searchbar"><input id="matSearch" placeholder="🔍 Cari bahan…" value="${esc(q||'')}"></div>
     <div class="tablewrap"><table>
-      <tr><th>ID</th><th>Nama Bahan</th><th>Kategori</th><th>Satuan</th><th class="num">Harga Beli</th><th class="num">Isi Kemasan</th><th class="num">Harga / Satuan</th><th>Aksi</th></tr>
+      <tr><th class="hide-m">ID</th><th>Nama Bahan</th><th class="hide-m">Kategori</th><th class="hide-m">Satuan</th><th class="num hide-m">Harga Beli</th><th class="num hide-m">Isi Kemasan</th><th class="num">Harga / Satuan</th><th>Aksi</th></tr>
       <tbody id="matRows"></tbody>
     </table></div>`;
   const draw = () => {
     const query = ($('#matSearch').value||'').toLowerCase();
     const list = S.materials.filter(m => !query || m.name.toLowerCase().includes(query) || String(m.category).toLowerCase().includes(query));
     $('#matRows').innerHTML = list.length ? list.map(m=>`
-      <tr><td>${m.id}</td><td><b>${esc(m.name)}</b></td><td><span class="pill gray">${esc(m.category)}</span></td><td>${esc(m.unit)}</td>
-        <td class="num">${rp(m.purchasePrice)}</td><td class="num">${fmt.format(m.packageSize)} ${esc(m.unit)}</td>
-        <td class="num"><b>${rp2(matUnitCost(m))}</b></td>
+      <tr><td class="hide-m">${m.id}</td><td><b>${esc(m.name)}</b></td><td class="hide-m"><span class="pill gray">${esc(m.category)}</span></td><td class="hide-m">${esc(m.unit)}</td>
+        <td class="num hide-m">${rp(m.purchasePrice)}</td><td class="num hide-m">${fmt.format(m.packageSize)} ${esc(m.unit)}</td>
+        <td class="num"><b>${rp2(matUnitCost(m))}</b>/${esc(m.unit)}</td>
         <td style="white-space:nowrap"><button class="btn btn-sm" data-e="${m.id}">✏️ Edit</button>
             <button class="btn btn-sm btn-danger" data-d="${m.id}">🗑️</button></td></tr>`).join('')
       : '<tr><td colspan="8" class="empty">Tidak ada bahan.</td></tr>';
@@ -873,8 +960,8 @@ function renderProducts(){
     <div class="searchbar"><input id="prodSearch" placeholder="🔍 Cari menu…">
       <select id="prodCatF"><option>Semua</option><option>Makanan</option><option>Minuman</option><option>Lainnya</option></select></div>
     <div class="tablewrap"><table style="min-width:900px">
-      <tr><th>Menu</th><th>Kategori</th><th class="num">Bahan (Rp)</th><th class="num">Labor</th><th class="num">Utilitas</th>
-          <th class="num">Total COGS</th><th class="num">Margin</th><th class="num">Harga Saran</th><th class="num">Harga Jual</th><th class="num">Laba/Unit</th><th>Status</th><th>Aksi</th></tr>
+      <tr><th>Menu</th><th class="hide-m">Kategori</th><th class="num hide-m">Bahan (Rp)</th><th class="num hide-m">Labor</th><th class="num hide-m">Utilitas</th>
+          <th class="num">Total COGS</th><th class="num hide-m">Margin</th><th class="num hide-m">Harga Saran</th><th class="num">Harga Jual</th><th class="num">Laba/Unit</th><th class="hide-m">Status</th><th>Aksi</th></tr>
       <tbody id="prodRows"></tbody>
     </table></div>`;
   const draw = () => {
@@ -887,14 +974,14 @@ function renderProducts(){
       const profit = (+p.sellPrice||0) - c.total;
       return `<tr>
         <td><b>${esc(p.name)}</b>${p.type==='simple'?' <span class="pill gray">beli jadi</span>':''}</td>
-        <td><span class="pill">${esc(p.category)}</span></td>
-        <td class="num">${rp2(c.raw)}</td><td class="num">${rp(c.labor)}</td><td class="num">${rp(c.util)}</td>
+        <td class="hide-m"><span class="pill">${esc(p.category)}</span></td>
+        <td class="num hide-m">${rp2(c.raw)}</td><td class="num hide-m">${rp(c.labor)}</td><td class="num hide-m">${rp(c.util)}</td>
         <td class="num"><b>${rp2(c.total)}</b></td>
-        <td class="num">${p.marginPct||0}%</td>
-        <td class="num">${rp2(rec)}</td>
+        <td class="num hide-m">${p.marginPct||0}%</td>
+        <td class="num hide-m">${rp2(rec)}</td>
         <td class="num"><b style="color:var(--green)">${rp(p.sellPrice)}</b></td>
         <td class="num"><span class="pill ${profit>=0?'':'red'}">${rp(profit)}</span></td>
-        <td>${p.active!==false?'<span class="pill">aktif</span>':'<span class="pill red">nonaktif</span>'}</td>
+        <td class="hide-m">${p.active!==false?'<span class="pill">aktif</span>':'<span class="pill red">nonaktif</span>'}</td>
         <td style="white-space:nowrap"><button class="btn btn-sm" data-e="${p.id}">✏️ Edit</button>
             <button class="btn btn-sm btn-danger" data-d="${p.id}">🗑️</button></td></tr>`;
     }).join('') : '<tr><td colspan="12" class="empty">Belum ada menu.</td></tr>';
@@ -1035,7 +1122,7 @@ async function renderReports(){
     </div>
     <div class="grid stats" id="rStats"></div>
     <div class="tablewrap"><table>
-      <tr><th>No. Invoice</th><th>Tanggal</th><th>Kasir</th><th>Pelanggan</th><th class="num">Item</th><th class="num">HPP</th><th class="num">Total</th><th class="num">Laba</th><th>Aksi</th></tr>
+      <tr><th>No. Invoice</th><th>Tanggal</th><th class="hide-m">Kasir</th><th class="hide-m">Pelanggan</th><th class="num hide-m">Item</th><th class="num hide-m">HPP</th><th class="num">Total</th><th class="num hide-m">Laba</th><th>Aksi</th></tr>
       <tbody id="rRows"></tbody>
     </table></div>`;
   const filtered = () => {
@@ -1057,9 +1144,9 @@ async function renderReports(){
       <div class="stat"><div class="lab">Laba Kotor</div><div class="val">${rp(omzet-hpp)}</div><div class="note">${omzet?Math.round((omzet-hpp)/omzet*100):0}% dari omzet</div></div>`;
     $('#rRows').innerHTML = list.length ? list.map(i=>{
       const c = i.items.reduce((x,r)=>x+(r.cost||0)*r.qty,0);
-      return `<tr><td><b>${esc(i.number)}</b></td><td>${dstr(i.date)} ${tstr(i.date)}</td><td>${esc(i.cashier)}</td><td>${esc(i.customer)||'-'}</td>
-        <td class="num">${i.items.reduce((x,r)=>x+r.qty,0)}</td><td class="num">${rp(c)}</td>
-        <td class="num"><b>${rp(i.total)}</b></td><td class="num">${rp(i.total-c)}</td>
+      return `<tr><td><b>${esc(i.number)}</b></td><td>${dstr(i.date)} ${tstr(i.date)}</td><td class="hide-m">${esc(i.cashier)}</td><td class="hide-m">${esc(i.customer)||'-'}</td>
+        <td class="num hide-m">${i.items.reduce((x,r)=>x+r.qty,0)}</td><td class="num hide-m">${rp(c)}</td>
+        <td class="num"><b>${rp(i.total)}</b></td><td class="num hide-m">${rp(i.total-c)}</td>
         <td style="white-space:nowrap"><button class="btn btn-sm" data-v="${i.id}">👁️</button>
         <button class="btn btn-sm btn-danger" data-x="${i.id}">🗑️</button></td></tr>`;
     }).join('') : '<tr><td colspan="9" class="empty">Tidak ada transaksi pada rentang tanggal ini.</td></tr>';

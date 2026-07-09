@@ -1,6 +1,6 @@
 /* Service worker Warung COGS — membuat aplikasi bisa di-install
    di layar HP dan tetap berjalan tanpa internet. */
-const CACHE = 'warung-cogs-v1';
+const CACHE = 'warung-cogs-v2';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
