@@ -23,7 +23,9 @@ penjualan** untuk makanan, minuman, dan produk lainnya.
 - **🧾 Kasir & Invoice** — klik produk → keranjang → diskon/pajak → cetak struk dengan nomor invoice otomatis; cetak ulang transaksi hari ini.
 - **📈 Laporan Penjualan** — omzet, HPP terjual, laba kotor per rentang tanggal; ekspor CSV ke Excel.
 - **🔐 Aman dari kasir** — mode Kasir tidak bisa mengubah harga/resep/laporan; mode Admin dilindungi PIN (ter-hash SHA-256) dan terkunci otomatis setelah 5 menit; batas diskon kasir bisa diatur.
-- **💾 Data besar & backup** — penyimpanan IndexedDB (ratusan ribu transaksi); ekspor/impor JSON untuk backup dan sinkronisasi antar perangkat.
+- **☁️ Sinkronisasi antar-perangkat (real-time)** — hubungkan HP kasir & perangkat pemilik lewat Firebase gratis: pantau transaksi dari mana saja, ubah harga dari rumah. Panduan: [PANDUAN_SINKRONISASI.md](PANDUAN_SINKRONISASI.md).
+- **📱 Ter-install seperti aplikasi (PWA)** — tambah ke layar utama HP: layar penuh tanpa browser, tetap jalan offline.
+- **💾 Data besar & backup** — penyimpanan IndexedDB (ratusan ribu transaksi); ekspor/impor JSON untuk backup dan pemindahan data.
 
 ## 🎬 Contoh Demonstrasi
 

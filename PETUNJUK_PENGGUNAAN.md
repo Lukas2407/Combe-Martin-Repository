@@ -19,10 +19,12 @@ Aplikasi hanya terdiri dari **satu file: `index.html`** — tidak perlu instalas
 
 ### Dipakai beberapa orang di cafe
 
-- Salin file `index.html` ke **setiap perangkat** (kasir 1, kasir 2, laptop pemilik) — kirim via WhatsApp/email/flashdisk.
+- Salin file `index.html` ke **setiap perangkat** (kasir 1, kasir 2, laptop pemilik) — kirim via WhatsApp/email/flashdisk, atau buka lewat link GitHub Pages lalu *Tambahkan ke layar utama*.
 - **Data tersimpan di masing-masing perangkat** (browser-nya), bukan di file HTML. Menutup browser tidak menghapus data.
-- Untuk menyamakan data antar perangkat: di perangkat utama, **Pengaturan → Ekspor Semua Data (JSON)**,
-  lalu di perangkat lain **Pengaturan → Impor Data dari File**.
+- **☁️ Mode terhubung (disarankan)**: aktifkan *Sinkronisasi Antar-Perangkat* di Pengaturan agar semua
+  perangkat berbagi data secara **real-time** — pemilik bisa memantau transaksi dari luar restoran dan
+  mengubah harga dari rumah. Panduan lengkap 5 menit: **PANDUAN_SINKRONISASI.md**.
+- Tanpa sinkronisasi, samakan data manual: **Pengaturan → Ekspor Semua Data (JSON)** → **Impor** di perangkat lain.
 - Kapasitas penyimpanan menggunakan IndexedDB browser — cukup untuk **ratusan ribu transaksi**.
 
 ---

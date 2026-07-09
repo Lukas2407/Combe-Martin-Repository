@@ -1,6 +1,8 @@
 /* Service worker Warung COGS — membuat aplikasi bisa di-install
-   di layar HP dan tetap berjalan tanpa internet. */
-const CACHE = 'warung-cogs-v2';
+   di layar HP dan tetap berjalan tanpa internet.
+   Halaman: network-first (update langsung terlihat saat online,
+   cache dipakai saat offline). Aset lain: cache-first. */
+const CACHE = 'warung-cogs-v4';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -18,14 +20,25 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-  e.respondWith(
-    caches.match(e.request, { ignoreSearch: true }).then(hit =>
-      hit ||
+  const isPage = e.request.mode === 'navigate' || e.request.url.includes('index.html');
+  if (isPage) {
+    e.respondWith(
       fetch(e.request).then(res => {
         const copy = res.clone();
-        caches.open(CACHE).then(c => c.put(e.request, copy));
+        caches.open(CACHE).then(c => c.put('./index.html', copy));
         return res;
       }).catch(() => caches.match('./index.html'))
-    )
-  );
+    );
+  } else {
+    e.respondWith(
+      caches.match(e.request, { ignoreSearch: true }).then(hit =>
+        hit ||
+        fetch(e.request).then(res => {
+          const copy = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, copy));
+          return res;
+        })
+      )
+    );
+  }
 });

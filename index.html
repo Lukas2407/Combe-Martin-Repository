@@ -10,26 +10,29 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Kasir Cafe">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍽️</text></svg>">
 <style>
 :root{
-  --green:#1e5c46; --green-dark:#153f30; --green-light:#e8f3ee;
-  --amber:#e8a13d; --amber-dark:#c9821c;
-  --bg:#f4f6f3; --card:#ffffff; --ink:#1c2b24; --muted:#68776f;
-  --line:#e3e8e4; --danger:#c0392b; --danger-bg:#fdecea;
-  --radius:14px; --shadow:0 1px 3px rgba(20,40,30,.08),0 4px 16px rgba(20,40,30,.06);
+  --green:#15694b; --green-dark:#0d3d2d; --green-deep:#0a2f23; --green-light:#e6f3ec;
+  --amber:#efa63f; --amber-dark:#c9821c;
+  --bg:#f1f4f0; --card:#ffffff; --ink:#16241d; --muted:#617168;
+  --line:#e1e7e1; --danger:#c0392b; --danger-bg:#fdecea;
+  --radius:16px; --shadow:0 1px 2px rgba(14,36,26,.05),0 8px 28px rgba(14,36,26,.07);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.5}
+body{font-family:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.5}
 button{font:inherit;cursor:pointer}
 input,select,textarea{font:inherit;color:var(--ink)}
 h1,h2,h3{line-height:1.25}
 
 /* ---------- layout ---------- */
 .app{display:flex;min-height:100vh}
-.sidebar{width:230px;background:var(--green-dark);color:#dfece6;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;flex-shrink:0}
+.sidebar{width:232px;background:linear-gradient(180deg,var(--green-dark),var(--green-deep));color:#dfece6;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;flex-shrink:0}
 .brand{padding:20px 18px 14px;border-bottom:1px solid rgba(255,255,255,.09)}
 .brand .logo{font-size:26px}
 .brand .name{font-weight:700;font-size:16px;color:#fff;margin-top:4px;word-break:break-word}
@@ -55,13 +58,14 @@ h1,h2,h3{line-height:1.25}
 .card h2{font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .grid{display:grid;gap:14px}
 .grid.stats{grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-bottom:16px}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px}
-.stat .lab{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
-.stat .val{font-size:20px;font-weight:800;margin-top:2px;color:var(--green)}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:15px 18px;border-top:3px solid var(--green)}
+.stat .lab{font-size:11.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.stat .val{font-size:21px;font-weight:800;margin-top:2px;color:var(--green-dark);letter-spacing:-.01em}
 .stat .note{font-size:11.5px;color:var(--muted)}
-.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:10px;border:1px solid var(--line);background:#fff;font-weight:600;font-size:13.5px;color:var(--ink)}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:10px;border:1px solid var(--line);background:#fff;font-weight:700;font-size:13.5px;color:var(--ink);transition:background .15s,transform .08s,box-shadow .15s}
 .btn:hover{background:#f2f5f2}
-.btn-primary{background:var(--green);border-color:var(--green);color:#fff}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(180deg,#1a7b58,var(--green));border-color:var(--green);color:#fff;box-shadow:0 2px 8px rgba(21,105,75,.3)}
 .btn-primary:hover{background:var(--green-dark)}
 .btn-amber{background:var(--amber);border-color:var(--amber);color:#2a1f08}
 .btn-amber:hover{background:var(--amber-dark);color:#fff}
@@ -110,8 +114,9 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
 /* kasir */
 .pos{display:grid;grid-template-columns:1fr 360px;gap:16px;align-items:start}
 .prodgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
-.prodcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;text-align:left;transition:transform .08s, border-color .12s}
-.prodcard:hover{border-color:var(--green);transform:translateY(-1px)}
+.prodcard{background:#fff;border:1px solid var(--line);border-radius:13px;padding:12px;cursor:pointer;text-align:left;box-shadow:0 1px 2px rgba(14,36,26,.04);transition:transform .08s,border-color .12s,box-shadow .15s}
+.prodcard:hover{border-color:var(--green);transform:translateY(-1px);box-shadow:0 6px 16px rgba(14,36,26,.1)}
+.prodcard:active{transform:scale(.97)}
 .prodcard .pn{font-weight:700;font-size:13.5px;line-height:1.3}
 .prodcard .pc{font-size:11px;color:var(--muted);margin:2px 0 6px}
 .prodcard .pp{font-weight:800;color:var(--green);font-size:14px}
@@ -141,6 +146,11 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
   #printArea,#printArea *{visibility:visible}
   #printArea{display:block;position:absolute;left:0;top:0;width:100%}
 }
+
+/* lencana status sinkronisasi cloud */
+.syncdot{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:99px;background:rgba(255,255,255,.12);color:#b9cfc4;cursor:default}
+.syncdot.on{background:var(--green-light);color:var(--green-dark)}
+.syncdot.err{background:var(--danger-bg);color:var(--danger)}
 
 /* mobile top bar & floating cart button (hidden on desktop) */
 .mtop{display:none}
@@ -222,7 +232,8 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
 <body>
 <header class="mtop">
   <span class="mlogo">🍽️</span>
-  <div class="mname" id="brandNameM">Warung COGS</div>
+  <div class="mname" id="brandNameM">Warung COGS <small style="opacity:.65;font-size:10px;font-weight:600">v4</small></div>
+  <span class="syncdot off" id="syncDotM" title="Status sinkronisasi">☁️</span>
   <span class="rolechip" id="roleChipM">Kasir</span>
   <button id="roleBtnM" title="Ganti mode">🔓</button>
 </header>
@@ -231,7 +242,8 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
     <div class="brand">
       <div class="logo">🍽️</div>
       <div class="name" id="brandName">Warung COGS</div>
-      <div class="tag">Kalkulator HPP &amp; Kasir</div>
+      <div class="tag">Kalkulator HPP &amp; Kasir · <b>versi 4</b></div>
+      <div style="margin-top:8px"><span class="syncdot off" id="syncDot" title="Status sinkronisasi antar perangkat">☁️ Lokal</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="rolebox">
@@ -409,13 +421,134 @@ const S = {
 const DEFAULT_PIN = '1234';
 
 async function saveAll(){ await Promise.all([
-  kvSet('settings', S.settings), kvSet('overhead', S.overhead),
-  kvSet('materials', S.materials), kvSet('products', S.products)
+  saveSettings(), saveOverhead(), saveMaterials(), saveProducts()
 ]); }
-const saveSettings  = () => kvSet('settings', S.settings);
-const saveOverhead  = () => kvSet('overhead', S.overhead);
-const saveMaterials = () => kvSet('materials', S.materials);
-const saveProducts  = () => kvSet('products', S.products);
+const saveSettings  = () => { queueSync('settings');  return kvSet('settings', S.settings); };
+const saveOverhead  = () => { queueSync('overhead');  return kvSet('overhead', S.overhead); };
+const saveMaterials = () => { queueSync('materials'); return kvSet('materials', S.materials); };
+const saveProducts  = () => { queueSync('products');  return kvSet('products', S.products); };
+
+/* ---------- sinkronisasi antar perangkat (Firebase Firestore) ----------
+   Data disimpan di akun Firebase milik pemilik usaha sendiri. Semua
+   perangkat dengan ID Toko yang sama saling terhubung real-time, sehingga
+   pemilik bisa memantau input kasir dari mana saja. Panduan pembuatan
+   akun: PANDUAN_SINKRONISASI.md */
+const SYNC = { db:null, on:false, state:'off', timers:{} };
+const SYNCED_SETTINGS = ['cafeName','address','phone','receiptNote','taxPct','maxDiscKasir','pinHash'];
+const kvPath  = id => `stores/${S.settings.sync.storeId}/kv/${id}`;
+const invPath = id => `stores/${S.settings.sync.storeId}/invoices/${id}`;
+function setSyncBadge(state, msg){
+  SYNC.state = state;
+  const label = state==='on' ? '☁️ Tersinkron' : state==='err' ? '☁️ Gagal' : '☁️ Lokal';
+  const d1 = document.getElementById('syncDot');
+  const d2 = document.getElementById('syncDotM');
+  if(d1){ d1.className = 'syncdot ' + state; d1.textContent = label; d1.title = msg || label; }
+  if(d2){ d2.className = 'syncdot ' + state; d2.textContent = '☁️'; d2.title = msg || label; }
+  const st = document.getElementById('syStatus');
+  if(st) st.textContent = msg || label;
+}
+function loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=()=>rej(new Error('tidak bisa memuat '+src+' — periksa koneksi internet')); document.head.appendChild(s); }); }
+async function syncInit(){
+  const sy = S.settings.sync || {};
+  if(!sy.enabled || !sy.apiKey || !sy.projectId || !sy.storeId){ SYNC.on=false; setSyncBadge('off'); return; }
+  try{
+    setSyncBadge('off', '☁️ Menyambungkan…');
+    if(!window.firebase){
+      await loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js');
+      await loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js');
+    }
+    if(!firebase.apps.length) firebase.initializeApp({ apiKey:sy.apiKey, authDomain:sy.projectId+'.firebaseapp.com', projectId:sy.projectId });
+    SYNC.db = firebase.firestore();
+    try{ await SYNC.db.enablePersistence({synchronizeTabs:true}); }catch(e){/* tab lain sudah memegang */}
+    SYNC.on = true;
+    // perangkat pertama yang tersambung mengunggah data lokalnya ke cloud
+    const probe = await SYNC.db.doc(kvPath('materials')).get();
+    if(!probe.exists) await pushAllToCloud();
+    listenCloud();
+    setSyncBadge('on');
+  }catch(err){
+    SYNC.on = false;
+    setSyncBadge('err', '☁️ Gagal: ' + err.message);
+    toast('☁️ Sinkronisasi gagal: ' + err.message);
+  }
+}
+function queueSync(id){
+  if(!SYNC.on) return;
+  clearTimeout(SYNC.timers[id]);
+  SYNC.timers[id] = setTimeout(()=>pushKV(id), 700);
+}
+function pushKV(id){
+  if(!SYNC.on) return;
+  let data;
+  if(id==='materials') data = S.materials;
+  else if(id==='products') data = S.products;
+  else if(id==='overhead') data = S.overhead;
+  else if(id==='settings'){ data = {}; for(const k of SYNCED_SETTINGS) data[k] = S.settings[k] ?? null; }
+  SYNC.db.doc(kvPath(id)).set({ j: JSON.stringify(data), dev: S.settings.deviceId, at: Date.now() })
+    .then(()=>setSyncBadge('on'))
+    .catch(e=>setSyncBadge('err', '☁️ Gagal kirim: ' + e.message));
+}
+function pushInvoice(inv){
+  if(!SYNC.on) return;
+  SYNC.db.doc(invPath(inv.id)).set({ j: JSON.stringify(inv), dev: S.settings.deviceId, at: Date.now() })
+    .then(()=>setSyncBadge('on'))
+    .catch(e=>setSyncBadge('err', '☁️ Gagal kirim: ' + e.message));
+}
+function deleteInvoiceCloud(id){
+  if(!SYNC.on) return;
+  SYNC.db.doc(invPath(id)).delete().catch(()=>{});
+}
+async function pushAllToCloud(){
+  for(const id of ['materials','products','overhead','settings']) pushKV(id);
+  for(const inv of await invAll()) pushInvoice(inv);
+}
+async function wipeCloud(){
+  if(!SYNC.on) return;
+  try{
+    const snap = await SYNC.db.collection(`stores/${S.settings.sync.storeId}/invoices`).get();
+    for(const d of snap.docs) await d.ref.delete();
+  }catch(e){/* biarkan */}
+}
+function listenCloud(){
+  const sid = S.settings.sync.storeId;
+  SYNC.db.collection(`stores/${sid}/kv`).onSnapshot(snap=>{
+    let changed = false;
+    snap.docChanges().forEach(ch=>{
+      const d = ch.doc.data();
+      if(!d || d.dev === S.settings.deviceId) return;
+      let val; try{ val = JSON.parse(d.j); }catch(e){ return; }
+      if(val == null) return;
+      const id = ch.doc.id;
+      if(id==='materials'){ S.materials = val; kvSet('materials', val); changed = true; }
+      else if(id==='products'){ S.products = val; kvSet('products', val); changed = true; }
+      else if(id==='overhead'){ S.overhead = val; kvSet('overhead', val); changed = true; }
+      else if(id==='settings'){ Object.assign(S.settings, val); kvSet('settings', S.settings); changed = true; }
+    });
+    if(changed) remoteRefresh();
+  }, e=>setSyncBadge('err', '☁️ ' + e.message));
+  SYNC.db.collection(`stores/${sid}/invoices`).onSnapshot(snap=>{
+    let changed = false;
+    snap.docChanges().forEach(ch=>{
+      if(ch.type === 'removed'){ invDel(ch.doc.id); changed = true; return; }
+      const d = ch.doc.data();
+      if(!d || d.dev === S.settings.deviceId) return;
+      let inv; try{ inv = JSON.parse(d.j); }catch(e){ return; }
+      if(inv && inv.id){ invPut(inv); changed = true; }
+    });
+    if(changed) remoteRefresh();
+  }, e=>setSyncBadge('err', '☁️ ' + e.message));
+}
+let _rrTimer = null;
+function remoteRefresh(){
+  clearTimeout(_rrTimer);
+  _rrTimer = setTimeout(()=>{
+    setSyncBadge('on');
+    if($('#overlay').classList.contains('open')) return;          // jangan ganggu saat mengedit
+    if(S.tab === 'kasir' && S.cart.length){ drawRecent(); return; } // jangan reset keranjang berjalan
+    renderAll();
+    toast('🔄 Data diperbarui dari perangkat lain');
+  }, 400);
+}
 
 /* ---------- data demo (persis mengikuti Excel COGS_Final_Combe_Martin) ---------- */
 function demoData(){
@@ -479,7 +612,7 @@ async function seedDemo(withInvoices){
       mk(5,  [['p5',1],['p3',1],['p7',2]], 'Ibu Sari'),
       mk(1,  [['p4',1],['p8',1]], ''),
     ];
-    for(const iv of demos) await invPut(iv);
+    for(const iv of demos){ await invPut(iv); pushInvoice(iv); }
   }
 }
 
@@ -515,7 +648,8 @@ function invoiceNumber(date){
   const seq = (S.settings.invSeq[ymd]||0) + 1;
   S.settings.invSeq[ymd] = seq;
   saveSettings();
-  return `INV-${ymd}-${String(seq).padStart(3,'0')}`;
+  // huruf perangkat mencegah nomor kembar saat beberapa kasir tersinkron
+  return `INV-${ymd}-${S.settings.deviceTag||''}${String(seq).padStart(3,'0')}`;
 }
 
 /* ---------- peran & keamanan ---------- */
@@ -591,7 +725,8 @@ function renderNav(){
   chipM.className = 'rolechip' + (isAdmin() ? ' admin' : '');
   btnM.textContent = isAdmin() ? '🔒' : '🔓';
   btnM.onclick = toggleRole;
-  $('#brandName').textContent = $('#brandNameM').textContent = S.settings.cafeName || 'Warung COGS';
+  $('#brandName').textContent = S.settings.cafeName || 'Warung COGS';
+  $('#brandNameM').innerHTML = esc(S.settings.cafeName || 'Warung COGS') + ' <small style="opacity:.65;font-size:10px;font-weight:600">v4</small>';
 }
 let _lastW = window.innerWidth;
 window.addEventListener('resize', () => {
@@ -752,6 +887,7 @@ async function saveInvoice(){
     paid, change: paid - t.total,
   };
   await invPut(inv);
+  pushInvoice(inv);
   S.cart = []; S.cartDiscVal = 0;
   $('.cart').classList.remove('open');
   toast('✅ Invoice ' + inv.number + ' tersimpan');
@@ -1155,6 +1291,7 @@ async function renderReports(){
       if(!requireAdmin()) return;
       if(!confirm('Hapus invoice ini dari riwayat?')) return;
       await invDel(b.dataset.x);
+      deleteInvoiceCloud(b.dataset.x);
       S.invoices = S.invoices.filter(x=>x.id!==b.dataset.x);
       draw(); toast('🗑️ Invoice dihapus');
     });
@@ -1199,6 +1336,25 @@ function renderSettings(){
         <button class="btn btn-primary" id="pinChange">🔑 Ganti PIN</button>
       </div>
       <div class="card">
+        <h2>☁️ Sinkronisasi Antar-Perangkat</h2>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:10px">
+          Hubungkan semua perangkat (HP kasir, laptop Anda di rumah) agar transaksi &amp; perubahan harga
+          tersinkron <b>real-time</b> — Anda bisa memantau input kasir dari mana saja.
+          Butuh akun <b>Firebase gratis</b>: ikuti langkahnya di file <b>PANDUAN_SINKRONISASI.md</b> (5 menit).</p>
+        <div class="field"><label style="display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="syEnabled" style="width:auto" ${st.sync?.enabled?'checked':''}> Aktifkan sinkronisasi cloud</label></div>
+        <div class="field"><label>Firebase API Key</label><input id="syApi" value="${esc(st.sync?.apiKey||'')}" placeholder="AIza…" autocomplete="off"></div>
+        <div class="field"><label>Firebase Project ID</label><input id="syProj" value="${esc(st.sync?.projectId||'')}" placeholder="cth: cafe-combe-martin"></div>
+        <div class="field"><label>ID Toko — samakan di semua perangkat &amp; RAHASIAKAN</label>
+          <div style="display:flex;gap:6px">
+            <input id="syStore" value="${esc(st.sync?.storeId||'')}" placeholder="klik 🎲 untuk membuat" style="flex:1" autocomplete="off">
+            <button class="btn btn-sm" id="syGen" title="Buat ID acak yang aman">🎲</button>
+          </div>
+          <div class="hint">ID Toko berfungsi seperti kunci brankas data Anda — siapa pun yang tahu bisa membaca data. Buat yang panjang &amp; acak.</div></div>
+        <button class="btn btn-primary" id="sySave">💾 Simpan &amp; Sambungkan</button>
+        <div class="hint" id="syStatus" style="margin-top:8px">${SYNC.state==='on'?'☁️ Tersinkron':'☁️ Belum tersambung'}</div>
+      </div>
+      <div class="card">
         <h2>💾 Cadangan &amp; Data</h2>
         <p style="font-size:13px;color:var(--muted);margin-bottom:10px">Data tersimpan di perangkat ini (IndexedDB — mampu menampung ratusan ribu transaksi). Untuk memindahkan data ke perangkat lain, ekspor lalu impor di perangkat tujuan.</p>
         <div style="display:flex;flex-direction:column;gap:8px">
@@ -1210,6 +1366,27 @@ function renderSettings(){
         </div>
       </div>
     </div>`;
+  $('#syGen').onclick = () => {
+    const chars = 'abcdefghjkmnpqrstuvwxyz23456789';
+    let idr = 'toko-';
+    for(let i=0;i<22;i++) idr += chars[Math.floor(Math.random()*chars.length)];
+    $('#syStore').value = idr;
+  };
+  $('#sySave').onclick = async () => {
+    if(!requireAdmin()) return;
+    st.sync = {
+      enabled: $('#syEnabled').checked,
+      apiKey: $('#syApi').value.trim(),
+      projectId: $('#syProj').value.trim(),
+      storeId: $('#syStore').value.trim(),
+    };
+    await kvSet('settings', st);
+    if(st.sync.enabled && (!st.sync.apiKey || !st.sync.projectId || !st.sync.storeId))
+      return toast('Lengkapi API Key, Project ID, dan ID Toko dulu');
+    toast(st.sync.enabled ? '☁️ Menyambungkan…' : 'Sinkronisasi dimatikan');
+    if(!st.sync.enabled){ SYNC.on = false; setSyncBadge('off'); return; }
+    await syncInit();
+  };
   $('#stSave').onclick = async () => {
     if(!requireAdmin()) return;
     Object.assign(st, {
@@ -1250,6 +1427,7 @@ function renderSettings(){
       S.materials = data.materials||[]; S.products = data.products||[];
       await saveAll(); await invClear();
       for(const iv of (data.invoices||[])) await invPut(iv);
+      if(SYNC.on) await pushAllToCloud();
       renderAll(); toast('✅ Data berhasil diimpor');
     }catch(err){ toast('❌ Gagal impor: ' + err.message); }
     e.target.value = '';
@@ -1261,6 +1439,7 @@ function renderSettings(){
   $('#wipe').onclick = async () => {
     if(!confirm('HAPUS SEMUA DATA — bahan, menu, invoice, pengaturan? Tindakan ini tidak bisa dibatalkan!')) return;
     if(!confirm('Yakin? Pastikan Anda sudah mengekspor backup.')) return;
+    await wipeCloud();
     S.materials = []; S.products = [];
     S.overhead = {monthlySalary:0, monthlyPortions:0, electricity:0, water:0, gas:0, other:0};
     S.settings = await freshSettings();
@@ -1277,10 +1456,13 @@ function download(name, content, mime){
 }
 
 /* ---------- init ---------- */
+const DEVICE_TAGS = 'ABCDEFGHJKMNPQRSTUVWXYZ';
 async function freshSettings(){
   return { cafeName:'Cafe Combe Martin', address:'Jl. Contoh No. 1', phone:'',
            receiptNote:'Terima kasih atas kunjungan Anda! 🙏',
-           taxPct:0, maxDiscKasir:0, invSeq:{}, pinHash: await sha256(DEFAULT_PIN) };
+           taxPct:0, maxDiscKasir:0, invSeq:{}, pinHash: await sha256(DEFAULT_PIN),
+           deviceId: uid(), deviceTag: DEVICE_TAGS[Math.floor(Math.random()*DEVICE_TAGS.length)],
+           sync: { enabled:false, apiKey:'', projectId:'', storeId:'' } };
 }
 async function init(){
   await dbOpen();
@@ -1296,7 +1478,14 @@ async function init(){
   }
   S.materials = S.materials || []; S.products = S.products || [];
   S.overhead = S.overhead || {monthlySalary:0, monthlyPortions:0, electricity:0, water:0, gas:0, other:0};
+  // migrasi data lama: pastikan identitas perangkat & wadah sinkronisasi ada
+  let migrated = false;
+  if(!S.settings.deviceId){ S.settings.deviceId = uid(); migrated = true; }
+  if(!S.settings.deviceTag){ S.settings.deviceTag = DEVICE_TAGS[Math.floor(Math.random()*DEVICE_TAGS.length)]; migrated = true; }
+  if(!S.settings.sync){ S.settings.sync = { enabled:false, apiKey:'', projectId:'', storeId:'' }; migrated = true; }
+  if(migrated) await kvSet('settings', S.settings);
   renderAll();
+  syncInit();
   if(firstRun) setTimeout(()=>toast('👋 Selamat datang! Data demo sudah dimuat. PIN Admin: 1234'), 400);
 }
 init();
