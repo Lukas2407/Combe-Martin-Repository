@@ -831,12 +831,13 @@ function cartTotals(){
   // batasi diskon utk kasir
   const maxPct = isAdmin() ? 100 : (+S.settings.maxDiscKasir||0);
   let discount = discType==='%' ? subtotal*discVal/100 : discVal;
-  const capped = subtotal*maxPct/100;
-  if(discount > capped){ discount = capped; }
+  const cap = subtotal*maxPct/100;
+  let capped = false;
+  if(discount > cap){ discount = cap; capped = true; }
   if(discount > subtotal) discount = subtotal;
   const taxPct = num($('#taxPct') ? $('#taxPct').value : S.settings.taxPct);
   const tax = (subtotal-discount)*taxPct/100;
-  return { subtotal, discount, discType, discVal, taxPct, tax, total: subtotal-discount+tax };
+  return { subtotal, discount, discType, discVal, taxPct, tax, capped, maxPct, total: subtotal-discount+tax };
 }
 function drawCart(keep){
   const box = $('#cartItems'); if(!box) return;
@@ -857,6 +858,7 @@ function drawCart(keep){
   $('#cartTotals').innerHTML = `
     <div class="totrow"><span>Subtotal</span><b>${rp(t.subtotal)}</b></div>
     <div class="totrow"><span>Diskon</span><b>− ${rp(t.discount)}</b></div>
+    ${t.capped ? `<div class="totrow" style="color:var(--danger);font-size:12px"><span>⚠️ Diskon dibatasi maks. ${t.maxPct}% untuk kasir</span><span>— minta Admin</span></div>` : ''}
     <div class="totrow"><span>Pajak (${t.taxPct||0}%)</span><b>${rp(t.tax)}</b></div>
     <div class="totrow grand"><span>TOTAL</span><span>${rp(t.total)}</span></div>`;
   const fab = $('#cartFab');
