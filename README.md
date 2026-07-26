@@ -1,3 +1,7 @@
+> 💞 **Baru:** [**Keuangan Berdua**](keuangan/) — aplikasi catatan keuangan bulanan untuk **dua
+> orang dengan dua HP**, lengkap dengan anggaran per kategori, sinkronisasi real-time, dan
+> **review setiap bulan**. Panduan: [keuangan/PANDUAN_KEUANGAN.md](keuangan/PANDUAN_KEUANGAN.md).
+
 # 🍽️ Warung COGS — Kalkulator HPP & Kasir Restoran
 
 Aplikasi lengkap untuk usaha restoran/cafe: menghitung **COGS/HPP per menu** (mengikuti persis rumus
