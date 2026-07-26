@@ -236,9 +236,20 @@ a{color:var(--pri)}
    ===================================================================== */
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const rp=n=>'Rp '+Math.round(Math.abs(Number(n)||0)).toLocaleString('id-ID');
+/* mata uang: £ (bawaan, dengan pence) atau Rp — bisa diganti di Atur → Profil */
+const CURS={GBP:{sym:'£', locale:'en-GB', dec:2}, IDR:{sym:'Rp ', locale:'id-ID', dec:0}};
+const cur=()=>CURS[(S.settings&&S.settings.currency)||'GBP']||CURS.GBP;
+const rp=n=>{const c=cur(), v=Math.abs(Number(n)||0), fr=c.dec>0&&Math.round(v*100)%100!==0;
+  return c.sym+v.toLocaleString(c.locale,{minimumFractionDigits:fr?2:0, maximumFractionDigits:c.dec});};
 const rpS=n=>(n<0?'−':'')+rp(n);
-const num=v=>Number(String(v).replace(/[^\d]/g,''))||0;
+const num=v=>{
+  const c=cur(), s=String(v);
+  if(c.dec===0) return Number(s.replace(/[^\d]/g,''))||0;
+  const n=parseFloat(s.replace(/[^\d.]/g,''));
+  return isFinite(n)&&n>0?Math.round(n*100)/100:0;
+};
+const amtStr=n=>{const c=cur(), v=Number(n)||0, fr=c.dec>0&&Math.round(v*100)%100!==0;
+  return v?v.toLocaleString(c.locale,{minimumFractionDigits:fr?2:0, maximumFractionDigits:c.dec}):'';};
 const MON=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 const DAY=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
 const pad=n=>String(n).padStart(2,'0');
@@ -272,10 +283,10 @@ function defaultCats(){return [
 /* ---------- state ---------- */
 const LSK='keuanganBerdua.v1';      // data bersama (ikut tersinkron)
 const LSL='keuanganBerdua.loc.v1';  // khusus perangkat ini (identitas HP)
-let S={ settings:{nameA:'Orang 1', nameB:'Orang 2', sync:{enabled:false, apiKey:'', projectId:'', coupleId:''}}, categories:defaultCats(), tx:[], reviews:{} };
+let S={ settings:{nameA:'Orang 1', nameB:'Orang 2', currency:'GBP', sync:{enabled:false, apiKey:'', projectId:'', coupleId:''}}, categories:defaultCats(), tx:[], reviews:{} };
 let L={ me:'a', deviceId:rid(8), setupDone:false };
 function load(){
-  try{const j=JSON.parse(localStorage.getItem(LSK)); if(j&&j.settings){S=j; S.tx=S.tx||[]; S.reviews=S.reviews||{}; S.categories=S.categories&&S.categories.length?S.categories:defaultCats(); S.settings.sync=S.settings.sync||{enabled:false,apiKey:'',projectId:'',coupleId:''};}}catch(e){}
+  try{const j=JSON.parse(localStorage.getItem(LSK)); if(j&&j.settings){S=j; S.tx=S.tx||[]; S.reviews=S.reviews||{}; S.categories=S.categories&&S.categories.length?S.categories:defaultCats(); S.settings.sync=S.settings.sync||{enabled:false,apiKey:'',projectId:'',coupleId:''}; S.settings.currency=S.settings.currency||'GBP';}}catch(e){}
   try{const j=JSON.parse(localStorage.getItem(LSL)); if(j&&j.deviceId)L=j;}catch(e){}
 }
 function save(){ localStorage.setItem(LSK, JSON.stringify(S)); }
@@ -489,7 +500,7 @@ function vReview(){
   // catatan review + tandai selesai
   h+=`<div class="card"><h2>✍️ Catatan & Kesepakatan Review</h2>
     ${rv.done?`<div class="donebadge">✅ Review ${esc(mLabel(k))} selesai — ditandai oleh ${esc(nameOf(rv.by||'a'))}${rv.doneAt?', '+new Date(rv.doneAt).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}):''}</div>`:''}
-    <textarea id="revNote" rows="4" placeholder="Tulis hasil diskusi kalian… contoh: 'Bulan depan jatah jajan kopi maks 300rb', 'Naikkan tabungan jadi 1,5jt'." oninput="revNote('${k}',this)">${esc(rv.note||'')}</textarea>
+    <textarea id="revNote" rows="4" placeholder="Tulis hasil diskusi kalian… contoh: 'Bulan depan jatah ngopi dikurangi separuh', 'Naikkan setoran tabungan bulanan'." oninput="revNote('${k}',this)">${esc(rv.note||'')}</textarea>
     <div style="margin-top:10px">${rv.done
       ?`<button class="btn ghost" onclick="revDone('${k}',true)">↩️ Buka lagi review ini</button>`
       :`<button class="btn green" onclick="revDone('${k}',false)">✅ Tandai Review Selesai (oleh ${esc(nameOf(L.me))})</button>`}</div>
@@ -528,6 +539,13 @@ function vSet(){
         <button class="${L.me==='b'?'on':''}" onclick="setMe('b')">${esc(nameOf('b'))}</button>
       </div>
       <div class="tiny mut" style="margin-top:6px">Pilihan ini hanya untuk HP ini — di HP pasanganmu pilih nama yang satunya.</div>
+    </div>
+    <div class="field"><label>Mata uang</label>
+      <div class="seg">
+        <button class="${S.settings.currency!=='IDR'?'on':''}" onclick="setCur('GBP')">£ Poundsterling</button>
+        <button class="${S.settings.currency==='IDR'?'on':''}" onclick="setCur('IDR')">Rp Rupiah</button>
+      </div>
+      <div class="tiny mut" style="margin-top:6px">Berlaku untuk kalian berdua (ikut tersinkron). Nominal yang sudah tercatat tidak dikonversi otomatis.</div>
     </div>
   </div>
 
@@ -579,6 +597,7 @@ window.saveNames=()=>{
   save(); queueSync('settings'); render();
 };
 window.setMe=w=>{ L.me=w; saveL(); render(); toast('HP ini sekarang milik '+nameOf(w)); };
+window.setCur=c=>{ S.settings.currency=c; save(); queueSync('settings'); render(); toast('Mata uang: '+(c==='IDR'?'Rupiah (Rp)':'Poundsterling (£)')); };
 window.copyCid=()=>{
   const v=$('#syCid').value.trim(); if(!v) return toast('Belum ada ID.');
   (navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>toast('📋 ID disalin — kirim ke pasanganmu.'),()=>toast('Salin manual: '+v));
@@ -605,8 +624,8 @@ function drawTxModal(){
     <button class="${MT.type==='out'?'on tout':''}" onclick="mtType('out')">💸 Pengeluaran</button>
     <button class="${MT.type==='in'?'on tin':''}" onclick="mtType('in')">💰 Pemasukan</button>
   </div>
-  <div class="field"><input id="mtAmt" class="amount" inputmode="numeric" placeholder="0"
-    value="${MT.amount?Number(MT.amount).toLocaleString('id-ID'):''}" oninput="fmtAmt(this)"></div>
+  <div class="field"><input id="mtAmt" class="amount" inputmode="${cur().dec?'decimal':'numeric'}" placeholder="${cur().sym.trim()} 0"
+    value="${amtStr(MT.amount)}" oninput="fmtAmt(this)"></div>
   <div class="field"><label>Kategori</label><div class="catgrid" id="mtCats"></div></div>
   <div class="grid2">
     <div class="field"><label>Tanggal</label><input type="date" id="mtDate" value="${esc(MT.date)}"></div>
@@ -632,7 +651,17 @@ window.mtType=t=>{ MT.type=t; keepMt(); drawTxModal(); };
 window.mtWho=w=>{ MT.who=w; keepMt(); drawTxModal(); };
 window.mtCat=id=>{ MT.catId=id; drawMtCats(); };
 function keepMt(){ MT.amount=num($('#mtAmt').value); MT.date=$('#mtDate').value; MT.note=$('#mtNote').value; }
-window.fmtAmt=el=>{ const d=el.value.replace(/[^\d]/g,''); el.value=d?Number(d).toLocaleString('id-ID'):''; };
+window.fmtAmt=el=>{
+  const c=cur();
+  if(c.dec===0){ const d=el.value.replace(/[^\d]/g,''); el.value=d?Number(d).toLocaleString(c.locale):''; return; }
+  // £: izinkan satu titik desimal (maks 2 angka pence), beri pemisah ribuan pada bagian bulat
+  let v=el.value.replace(/[^\d.]/g,'');
+  const i=v.indexOf('.');
+  if(i>=0) v=v.slice(0,i+1)+v.slice(i+1).replace(/\./g,'').slice(0,2);
+  const p=v.split('.');
+  p[0]=p[0]?Number(p[0]).toLocaleString('en-GB'):'';
+  el.value=p.length>1?p[0]+'.'+p[1]:p[0];
+};
 window.saveTx=()=>{
   const amount=num($('#mtAmt').value);
   if(amount<=0) return toast('Isi dulu nominalnya ya 🙏');
@@ -677,8 +706,8 @@ function drawCatModal(c){
     <div class="field"><label>Emoji ikon</label><input id="mcIcon" value="${esc(c?c.icon:'🏷️')}" maxlength="4"></div>
     <div class="field"><label>Nama kategori</label><input id="mcName" value="${esc(c?c.name:'')}" placeholder="cth: Kopi & Nongkrong"></div>
   </div>
-  <div class="field" style="${MC.type==='in'?'display:none':''}"><label>Anggaran per bulan (Rp, 0 = tanpa anggaran)</label>
-    <input id="mcBud" inputmode="numeric" value="${c&&c.budget?Number(c.budget).toLocaleString('id-ID'):''}" placeholder="cth: 1.500.000" oninput="fmtAmt(this)"></div>
+  <div class="field" style="${MC.type==='in'?'display:none':''}"><label>Anggaran per bulan (${cur().sym.trim()}, kosong = tanpa anggaran)</label>
+    <input id="mcBud" inputmode="${cur().dec?'decimal':'numeric'}" value="${amtStr(c?c.budget:0)}" placeholder="${cur().dec?'cth: 1,500':'cth: 1.500.000'}" oninput="fmtAmt(this)"></div>
   <button class="btn" onclick="saveCat()">💾 Simpan</button>
   ${c?`<button class="btn danger" style="margin-top:8px" onclick="delCat('${esc(c.id)}')" ${used?'disabled title="Masih dipakai transaksi"':''}>🗑️ Hapus kategori${used?' (masih dipakai transaksi)':''}</button>`:''}`;
 }
@@ -801,7 +830,7 @@ function pushKV(id){
   let data;
   if(id==='categories') data=S.categories;
   else if(id==='reviews') data=S.reviews;
-  else if(id==='settings') data={nameA:S.settings.nameA, nameB:S.settings.nameB};
+  else if(id==='settings') data={nameA:S.settings.nameA, nameB:S.settings.nameB, currency:S.settings.currency};
   SYNC.db.doc(kvPath(id)).set({j:JSON.stringify(data), dev:L.deviceId, at:Date.now()})
     .then(()=>setSyncBadge('on'))
     .catch(e=>setSyncBadge('err','☁️ Gagal kirim: '+e.message));
@@ -828,7 +857,7 @@ function listenCloud(){
       if(val==null) return;
       const id=ch.doc.id;
       if(id==='categories'){ S.categories=val; changed=true; }
-      else if(id==='settings'){ Object.assign(S.settings,{nameA:val.nameA??S.settings.nameA, nameB:val.nameB??S.settings.nameB}); changed=true; }
+      else if(id==='settings'){ Object.assign(S.settings,{nameA:val.nameA??S.settings.nameA, nameB:val.nameB??S.settings.nameB, currency:val.currency??S.settings.currency}); changed=true; }
       else if(id==='reviews'){
         for(const k in val){ const cur=S.reviews[k]; if(!cur||(val[k].at||0)>=(cur.at||0)) S.reviews[k]=val[k]; }
         changed=true;
@@ -865,7 +894,7 @@ function remoteRefresh(){
 /* ---------- ekspor / impor / demo / hapus ---------- */
 window.exportJson=()=>{
   const data={app:'keuangan-berdua', version:1, exportedAt:new Date().toISOString(),
-    settings:{nameA:S.settings.nameA, nameB:S.settings.nameB},
+    settings:{nameA:S.settings.nameA, nameB:S.settings.nameB, currency:S.settings.currency},
     categories:S.categories, tx:S.tx, reviews:S.reviews};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a');
@@ -883,7 +912,7 @@ window.importJson=inp=>{
       if(!Array.isArray(d.tx)||!Array.isArray(d.categories)) throw new Error('format tidak dikenal');
       if(!confirm('Impor akan MENGGANTI data di HP ini dengan isi file ('+d.tx.length+' transaksi). Lanjutkan?')) return;
       S.categories=d.categories; S.tx=d.tx; S.reviews=d.reviews||{};
-      if(d.settings){ S.settings.nameA=d.settings.nameA||S.settings.nameA; S.settings.nameB=d.settings.nameB||S.settings.nameB; }
+      if(d.settings){ S.settings.nameA=d.settings.nameA||S.settings.nameA; S.settings.nameB=d.settings.nameB||S.settings.nameB; S.settings.currency=d.settings.currency||S.settings.currency; }
       save(); render(); toast('⬆️ Data berhasil diimpor.');
       if(SYNC.on) pushAllToCloud();
     }catch(e){ toast('❌ File tidak valid: '+e.message); }
@@ -909,45 +938,46 @@ window.wipeAll=async()=>{
 };
 window.fillDemo=()=>{
   if(S.tx.length&&!confirm('Tambahkan data contoh ke catatan yang sudah ada?')) return;
-  const cur=mkeyNow(), prv=mAdd(cur,-1);
+  const cur_=mkeyNow(), prv=mAdd(cur_,-1);
   const D=(mk,day)=>mk+'-'+pad(day);
+  const A=(gbp,idr)=>cur().dec>0?gbp:idr; // nominal contoh mengikuti mata uang aktif
   const mk=(date,type,catId,who,amount,note)=>({id:'demo-'+rid(8), date, type, catId, who, amount, note, at:Date.now()});
   const demo=[
     // bulan lalu (lengkap — bahan untuk review)
-    mk(D(prv,1),'in','gaji','a',5200000,'Gaji bulanan'),
-    mk(D(prv,1),'in','gaji','b',4300000,'Gaji bulanan'),
-    mk(D(prv,2),'out','rumah','a',1500000,'Sewa kontrakan'),
-    mk(D(prv,3),'out','nabung','b',1000000,'Transfer tabungan bersama'),
-    mk(D(prv,4),'out','tagihan','b',350000,'Listrik & air'),
-    mk(D(prv,5),'out','tagihan','a',150000,'Paket data 2 HP'),
-    mk(D(prv,6),'out','belanja','b',480000,'Belanja mingguan'),
-    mk(D(prv,9),'out','makan','a',85000,'Makan di luar'),
-    mk(D(prv,12),'out','transport','a',200000,'Bensin motor'),
-    mk(D(prv,13),'out','belanja','b',450000,'Belanja mingguan'),
-    mk(D(prv,15),'out','hiburan','b',120000,'Nonton bioskop'),
-    mk(D(prv,18),'out','sehat','a',95000,'Obat & vitamin'),
-    mk(D(prv,20),'out','belanja','b',430000,'Belanja mingguan'),
-    mk(D(prv,22),'out','makan','b',65000,'Jajan kopi'),
-    mk(D(prv,25),'out','keluarga','a',300000,'Kado orang tua'),
-    mk(D(prv,27),'out','belanja','b',420000,'Belanja mingguan'),
-    mk(D(prv,28),'out','hiburan','a',150000,'Makan malam berdua'),
+    mk(D(prv,1),'in','gaji','a',A(2400,5200000),'Gaji bulanan'),
+    mk(D(prv,1),'in','gaji','b',A(1900,4300000),'Gaji bulanan'),
+    mk(D(prv,2),'out','rumah','a',A(950,1500000),'Sewa rumah'),
+    mk(D(prv,3),'out','nabung','b',A(400,1000000),'Transfer tabungan bersama'),
+    mk(D(prv,4),'out','tagihan','b',A(120,350000),'Listrik & air'),
+    mk(D(prv,5),'out','tagihan','a',A(40,150000),'Paket data 2 HP'),
+    mk(D(prv,6),'out','belanja','b',A(86.50,480000),'Belanja mingguan'),
+    mk(D(prv,9),'out','makan','a',A(28,85000),'Makan di luar'),
+    mk(D(prv,12),'out','transport','a',A(60,200000),'Bensin'),
+    mk(D(prv,13),'out','belanja','b',A(81.20,450000),'Belanja mingguan'),
+    mk(D(prv,15),'out','hiburan','b',A(30,120000),'Nonton bioskop'),
+    mk(D(prv,18),'out','sehat','a',A(22.50,95000),'Obat & vitamin'),
+    mk(D(prv,20),'out','belanja','b',A(78.40,430000),'Belanja mingguan'),
+    mk(D(prv,22),'out','makan','b',A(9.50,65000),'Jajan kopi'),
+    mk(D(prv,25),'out','keluarga','a',A(75,300000),'Kado orang tua'),
+    mk(D(prv,27),'out','belanja','b',A(76,420000),'Belanja mingguan'),
+    mk(D(prv,28),'out','hiburan','a',A(55,150000),'Makan malam berdua'),
     // bulan berjalan
-    mk(D(cur,1),'in','gaji','a',5200000,'Gaji bulanan'),
-    mk(D(cur,1),'in','gaji','b',4300000,'Gaji bulanan'),
-    mk(D(cur,2),'out','rumah','a',1500000,'Sewa kontrakan'),
-    mk(D(cur,3),'out','nabung','b',1200000,'Transfer tabungan bersama'),
-    mk(D(cur,4),'out','tagihan','b',340000,'Listrik & air'),
-    mk(D(cur,6),'out','belanja','b',470000,'Belanja mingguan'),
-    mk(D(cur,8),'out','transport','a',150000,'Bensin motor'),
-    mk(D(cur,10),'out','makan','a',75000,'Makan siang kantor'),
-    mk(D(cur,13),'out','belanja','b',455000,'Belanja mingguan'),
-    mk(D(cur,15),'out','hiburan','b',90000,'Jajan weekend'),
+    mk(D(cur_,1),'in','gaji','a',A(2400,5200000),'Gaji bulanan'),
+    mk(D(cur_,1),'in','gaji','b',A(1900,4300000),'Gaji bulanan'),
+    mk(D(cur_,2),'out','rumah','a',A(950,1500000),'Sewa rumah'),
+    mk(D(cur_,3),'out','nabung','b',A(450,1200000),'Transfer tabungan bersama'),
+    mk(D(cur_,4),'out','tagihan','b',A(115,340000),'Listrik & air'),
+    mk(D(cur_,6),'out','belanja','b',A(83.70,470000),'Belanja mingguan'),
+    mk(D(cur_,8),'out','transport','a',A(45,150000),'Bensin'),
+    mk(D(cur_,10),'out','makan','a',A(14.50,75000),'Makan siang kantor'),
+    mk(D(cur_,13),'out','belanja','b',A(79.90,455000),'Belanja mingguan'),
+    mk(D(cur_,15),'out','hiburan','b',A(25,90000),'Jajan weekend'),
   ].filter(t=>t.date<=todayStr()||t.date.slice(0,7)===prv);
   S.tx.push(...demo);
   // contoh anggaran
   const setBud=(id,v)=>{const c=S.categories.find(x=>x.id===id); if(c&&!c.budget)c.budget=v;};
-  setBud('makan',400000); setBud('belanja',2000000); setBud('transport',400000);
-  setBud('tagihan',600000); setBud('hiburan',300000); setBud('nabung',1500000);
+  setBud('makan',A(150,400000)); setBud('belanja',A(400,2000000)); setBud('transport',A(120,400000));
+  setBud('tagihan',A(200,600000)); setBud('hiburan',A(120,300000)); setBud('nabung',A(500,1500000));
   save(); queueSync('categories');
   if(SYNC.on) for(const t of demo) pushTxCloud(t);
   render(); toast('🎬 Data contoh dimuat — jelajahi Beranda, Riwayat, dan Review!');

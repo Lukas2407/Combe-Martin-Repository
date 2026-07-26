@@ -32,6 +32,11 @@ Saat pertama dibuka, aplikasi menanyakan:
 
 Semua ini bisa diubah kapan saja lewat **Atur → Profil Berdua**.
 
+**Mata uang bawaannya poundsterling (£)** lengkap dengan pence (misal £12.50). Kalau kalian ingin
+memakai Rupiah, ganti di **Atur → Profil Berdua → Mata uang** — pilihan ini berlaku untuk kedua HP
+(ikut tersinkron). Nominal yang sudah tercatat tidak dikonversi otomatis, jadi tentukan mata uangnya
+sejak awal.
+
 ## 3. Mencatat Keuangan Sehari-hari
 
 - Tekan tombol **＋** besar di tengah bawah.
