@@ -478,6 +478,25 @@ function vReview(){
       <div class="row"><span class="mut">Keluar</span><b style="color:var(--out)">${rp(p.out)}</b></div>
       <div class="row"><span class="mut">Selisih</span><b>${rpS(p.in-p.out)}</b></div></div>`;}).join('')}
   </div></div>`;
+  // perkembangan 6 bulan per orang
+  const mks=[...Array(6)].map((_,i)=>mAdd(k,-(5-i)));
+  const msums=mks.map(m=>({m, s:sums(m)}));
+  if(msums.some(x=>x.s.count)){
+    const maxOut=Math.max(...msums.map(x=>Math.max(x.s.byWho.a.out, x.s.byWho.b.out)), 1);
+    h+=`<div class="card"><h2>📊 Perkembangan 6 Bulan</h2>
+      <div class="tiny mut" style="margin-bottom:8px">Pengeluaran per orang tiap bulan —
+        <span style="color:var(--a)">●</span> ${esc(nameOf('a'))} &nbsp;
+        <span style="color:var(--b)">●</span> ${esc(nameOf('b'))}</div>`;
+    for(const {m, s:s2} of msums){
+      if(!s2.count){ h+=`<div class="crow"><div class="top"><span class="mut">${esc(mShort(m))}</span><span class="tiny mut">belum ada catatan</span></div></div>`; continue; }
+      h+=`<div class="crow"><div class="top"><span><b>${esc(mShort(m))}</b>${m===k?' <span class="tiny" style="color:var(--pri)">◀ bulan ini</span>':''}</span>
+        <b style="color:${s2.net<0?'var(--out)':'var(--in)'}">${s2.net<0?'−':'+'}${rp(s2.net)}</b></div>
+        <div class="bar" style="margin-top:6px"><i style="width:${Math.round(s2.byWho.a.out/maxOut*100)}%;background:var(--a)"></i></div>
+        <div class="bar" style="margin-top:3px"><i style="width:${Math.round(s2.byWho.b.out/maxOut*100)}%;background:var(--b)"></i></div>
+        <div class="tiny mut" style="margin-top:3px">${esc(nameOf('a'))} ${rp(s2.byWho.a.out)} · ${esc(nameOf('b'))} ${rp(s2.byWho.b.out)}</div></div>`;
+    }
+    h+=`</div>`;
+  }
   // anggaran vs realisasi
   const brows=S.categories.filter(c=>c.type==='out'&&((c.budget||0)>0||(s.byCatOut[c.id]||0)>0))
     .map(c=>({c,spent:s.byCatOut[c.id]||0})).sort((x,y)=>y.spent-x.spent);
@@ -584,11 +603,17 @@ function vSet(){
     <button class="btn danger" onclick="wipeAll()">🗑️ Hapus SEMUA data</button>
   </div>
 
-  <div class="card"><h2>📱 Pasang di Layar Utama</h2>
-    <p class="small mut" style="margin:0">Supaya terasa seperti aplikasi asli (layar penuh, ada ikonnya, jalan offline):<br>
-    • <b>Android (Chrome):</b> menu ⋮ → <i>Tambahkan ke layar utama</i> / <i>Instal aplikasi</i>.<br>
-    • <b>iPhone (Safari):</b> tombol Bagikan <span style="font-size:12px">⬆️</span> → <i>Tambah ke Layar Utama</i>.<br>
-    Lakukan di kedua HP.</p>
+  <div class="card"><h2>📲 Cara Pakai di 2 HP</h2>
+    <ol class="small" style="margin:0 0 10px; padding-left:20px; color:var(--ink)">
+      <li style="margin-bottom:6px"><b>Pasang di HP ini</b> — Android (Chrome): menu ⋮ → <i>Tambahkan ke layar utama</i> / <i>Instal aplikasi</i>. iPhone (Safari): tombol Bagikan ⬆️ → <i>Tambah ke Layar Utama</i>.</li>
+      <li style="margin-bottom:6px"><b>Kirim link aplikasi ke HP pasangan</b> (tombol di bawah), lalu pasang dengan cara yang sama.</li>
+      <li style="margin-bottom:6px"><b>Di HP pasangan</b>: isi nama kalian berdua yang sama, dan pilih "HP ini dipakai oleh" = dirinya.</li>
+      <li><b>Sambungkan keduanya</b> lewat kartu <b>☁️ Sinkronisasi 2 HP</b> di atas — isi API Key, Project ID, dan <b>ID Keluarga yang sama persis</b> di kedua HP. Setelah itu semua catatan &amp; progress kalian tampil di dua-duanya secara real-time.</li>
+    </ol>
+    <div class="grid2">
+      <button class="btn ghost" onclick="shareApp()">📤 Bagikan link</button>
+      <button class="btn ghost" onclick="copyAppLink()">🔗 Salin link</button>
+    </div>
   </div>`;
 }
 window.saveNames=()=>{
@@ -598,6 +623,17 @@ window.saveNames=()=>{
 };
 window.setMe=w=>{ L.me=w; saveL(); render(); toast('HP ini sekarang milik '+nameOf(w)); };
 window.setCur=c=>{ S.settings.currency=c; save(); queueSync('settings'); render(); toast('Mata uang: '+(c==='IDR'?'Rupiah (Rp)':'Poundsterling (£)')); };
+const appUrl=()=>location.href.split('#')[0].split('?')[0];
+window.shareApp=async()=>{
+  if(location.protocol==='file:') return toast('Aplikasi belum di-hosting — kirim file index.html ke HP pasangan.');
+  if(navigator.share){ try{ await navigator.share({title:'Keuangan Berdua 💞', text:'Pasang aplikasi keuangan kita di HP-mu:', url:appUrl()}); }catch(e){/* dibatalkan */} }
+  else copyAppLink();
+};
+window.copyAppLink=()=>{
+  if(location.protocol==='file:') return toast('Aplikasi belum di-hosting — kirim file index.html ke HP pasangan.');
+  (navigator.clipboard?navigator.clipboard.writeText(appUrl()):Promise.reject())
+    .then(()=>toast('🔗 Link disalin — kirim ke pasanganmu.'), ()=>toast(appUrl()));
+};
 window.copyCid=()=>{
   const v=$('#syCid').value.trim(); if(!v) return toast('Belum ada ID.');
   (navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>toast('📋 ID disalin — kirim ke pasanganmu.'),()=>toast('Salin manual: '+v));

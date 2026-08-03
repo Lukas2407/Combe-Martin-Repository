@@ -11,11 +11,16 @@ dengan anggaran per kategori dan **review keuangan setiap bulan**.
 ## 1. Cara Memasang di HP (lakukan di KEDUA HP)
 
 ### Cara termudah (lewat internet)
-1. Buka file `keuangan/index.html` dari repo ini di browser HP (misalnya lewat GitHub Pages
-   bila diaktifkan, atau layanan hosting statis apa pun).
+1. Buka alamat aplikasi di browser HP:
+
+   **https://lukas2407.github.io/Combe-Martin-Repository/keuangan/**
+
+   (Alamat ini aktif otomatis lewat GitHub Pages — workflow deploy ada di `.github/workflows/pages.yml`.)
 2. **Android (Chrome):** menu ⋮ → *Tambahkan ke layar utama* / *Instal aplikasi*.
 3. **iPhone (Safari):** tombol Bagikan ⬆️ → *Tambah ke Layar Utama*.
-4. Aplikasi muncul di layar utama dengan ikon 💜, terbuka layar penuh, dan tetap jalan offline.
+4. Aplikasi muncul di layar utama dengan ikon 💜£, terbuka layar penuh, dan tetap jalan offline.
+5. Ulangi langkah yang sama di HP kedua — atau lebih mudah: dari aplikasi, buka
+   **Atur → 📲 Cara Pakai di 2 HP → Bagikan link**.
 
 ### Tanpa hosting (offline)
 Kirim file `index.html` ke kedua HP (WhatsApp/email/kabel), lalu buka dengan browser.
