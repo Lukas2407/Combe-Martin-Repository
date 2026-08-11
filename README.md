@@ -1,4 +1,4 @@
-> 💞 **Baru:** [**Keuangan Berdua**](keuangan/) — aplikasi catatan keuangan bulanan untuk **dua
+> £ **Baru:** [**Catatan Keuangan**](keuangan/) — aplikasi catatan keuangan bulanan untuk **dua
 > orang dengan dua HP**, dalam **poundsterling (£)**, lengkap dengan anggaran per kategori,
 > sinkronisasi real-time, dan **review setiap bulan**.
 > Panduan: [keuangan/PANDUAN_KEUANGAN.md](keuangan/PANDUAN_KEUANGAN.md).
