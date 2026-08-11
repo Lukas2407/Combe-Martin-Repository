@@ -1,0 +1,1819 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Prof. Quill · Pemeriksa Grammar &amp; Tutor Menulis Inggris</title>
+<meta name="description" content="Pemeriksa grammar bahasa Inggris dengan penilaian dan komentar bergaya tutor Oxford/Harvard. Menandai kesalahan, memberi alternatif, dan menyarankan sinonim. Berjalan offline di satu berkas.">
+<meta name="theme-color" content="#002147">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Prof. Quill">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪶</text></svg>">
+<style>
+:root{
+  --oxford:#002147; --oxford-2:#00305f; --oxford-ink:#001730;
+  --crimson:#a51c30; --crimson-dark:#7d1523; --crimson-soft:#fceaec;
+  --gold:#b8912f; --gold-soft:#fdf3dc;
+  --parch:#f6f1e6; --paper:#ffffff; --ink:#1d2430; --muted:#6a7383;
+  --line:#e3ddd0; --line-2:#efe9dd;
+  --ok:#1f7a4d; --ok-soft:#e6f4ec;
+  --grammar:#c0392b; --spelling:#d97706; --punct:#2563eb;
+  --style:#7c3aed; --register:#0d9488; --vocab:#15803d;
+  --radius:14px;
+  --shadow:0 1px 2px rgba(0,33,71,.06),0 10px 30px rgba(0,33,71,.08);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:var(--sans);background:var(--parch);color:var(--ink);font-size:15px;line-height:1.55}
+button{font:inherit;cursor:pointer;color:inherit}
+input,select,textarea{font:inherit;color:var(--ink)}
+h1,h2,h3{line-height:1.25}
+::selection{background:#ffe9a8}
+
+/* ---------------- top bar ---------------- */
+.top{background:linear-gradient(180deg,var(--oxford),var(--oxford-ink));color:#e8eef6;padding:14px clamp(12px,3vw,28px);
+     display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:40;
+     box-shadow:0 2px 18px rgba(0,23,48,.28)}
+.top .crest{width:42px;height:42px;border-radius:11px;background:var(--crimson);display:grid;place-items:center;
+     font-size:22px;flex-shrink:0;box-shadow:inset 0 0 0 2px rgba(255,255,255,.18)}
+.top .who{min-width:0}
+.top h1{font-family:var(--serif);font-size:19px;font-weight:700;color:#fff;letter-spacing:.01em}
+.top .sub{font-size:11.5px;color:#9fb4cd;letter-spacing:.05em;text-transform:uppercase}
+.top .spacer{flex:1}
+.topctl{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.selwrap{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);
+     border-radius:10px;padding:5px 9px}
+.selwrap label{font-size:11px;color:#a9bdd4;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.selwrap select{background:transparent;border:0;color:#fff;font-size:13.5px;font-weight:600;outline:none}
+.selwrap select option{color:#12233a}
+
+/* ---------------- buttons ---------------- */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:10px;border:1px solid var(--line);
+     background:#fff;font-weight:700;font-size:13.5px;transition:background .15s,transform .07s,box-shadow .15s,color .15s}
+.btn:hover{background:#f4f0e7}
+.btn:active{transform:scale(.97)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn-primary{background:linear-gradient(180deg,#b82237,var(--crimson));border-color:var(--crimson-dark);color:#fff;
+     box-shadow:0 2px 10px rgba(165,28,48,.32)}
+.btn-primary:hover{background:var(--crimson-dark)}
+.btn-ghost{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.22);color:#e8eef6}
+.btn-ghost:hover{background:rgba(255,255,255,.17)}
+.btn-sm{padding:5px 10px;font-size:12.5px;border-radius:8px}
+.btn-gold{background:var(--gold-soft);border-color:#e8d3a0;color:#6d5312}
+.btn-gold:hover{background:#f7e6bf}
+
+/* ---------------- layout ---------------- */
+.wrap{max-width:1440px;margin:0 auto;padding:18px clamp(10px,3vw,28px) 90px}
+.cols{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:18px;align-items:start}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:16px}
+.card>.head{display:flex;align-items:center;gap:9px;padding:13px 16px;border-bottom:1px solid var(--line-2);flex-wrap:wrap}
+.card>.head h2{font-family:var(--serif);font-size:15.5px;font-weight:700}
+.card>.head .spacer{flex:1}
+.card>.body{padding:16px}
+.card>.body.tight{padding:0}
+
+/* ---------------- editor ---------------- */
+#editor{width:100%;min-height:290px;border:0;outline:none;resize:vertical;padding:16px 18px;font-family:var(--serif);
+     font-size:16.5px;line-height:1.75;background:repeating-linear-gradient(transparent,transparent 27.5px,#f2ece0 28px);
+     border-radius:0 0 var(--radius) var(--radius)}
+#editor::placeholder{color:#a9a294}
+.meter{display:flex;gap:16px;flex-wrap:wrap;padding:9px 16px;border-top:1px solid var(--line-2);font-size:12.5px;color:var(--muted)}
+.meter b{color:var(--ink);font-weight:700}
+.toolrow{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;border-top:1px solid var(--line-2);background:#fcfaf5;
+     border-radius:0 0 var(--radius) var(--radius)}
+
+/* ---------------- marked preview ---------------- */
+.legend{display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--line-2);background:#fcfaf5}
+.lg{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:var(--muted);
+    border:1px solid var(--line);background:#fff;border-radius:99px;padding:3px 9px;cursor:pointer;user-select:none}
+.lg .dot{width:9px;height:9px;border-radius:3px}
+.lg.off{opacity:.4}
+.lg .n{color:var(--ink)}
+#preview{padding:16px 18px;font-family:var(--serif);font-size:16.5px;line-height:2.05;white-space:pre-wrap;word-wrap:break-word;
+     min-height:120px;max-height:60vh;overflow:auto}
+#preview .w{border-radius:3px;cursor:pointer}
+#preview .w:hover{background:#eef3fb;box-shadow:0 0 0 2px #eef3fb}
+mark.hl{background:none;color:inherit;border-radius:3px;cursor:pointer;padding:1px 0;
+     box-shadow:inset 0 -2px 0 currentColor;transition:background .12s}
+mark.hl .t{color:var(--ink)}
+mark.hl:hover{background:#fff5cc}
+mark.hl.sel{background:#ffe9a8;box-shadow:inset 0 -2px 0 currentColor,0 0 0 3px #ffe9a8}
+mark.c-grammar{color:var(--grammar)} mark.c-spelling{color:var(--spelling)} mark.c-punct{color:var(--punct)}
+mark.c-style{color:var(--style)} mark.c-register{color:var(--register)} mark.c-vocab{color:var(--vocab)}
+.empty{color:var(--muted);font-family:var(--sans);font-size:13.5px;text-align:center;padding:26px 14px}
+
+/* ---------------- tabs ---------------- */
+.tabs{display:flex;gap:4px;padding:8px 8px 0;background:#fcfaf5;border-bottom:1px solid var(--line-2);
+      border-radius:var(--radius) var(--radius) 0 0;overflow-x:auto}
+.tabs button{border:1px solid transparent;border-bottom:0;background:none;padding:9px 13px;border-radius:10px 10px 0 0;
+      font-size:13.5px;font-weight:700;color:var(--muted);white-space:nowrap}
+.tabs button:hover{color:var(--ink)}
+.tabs button.active{background:#fff;border-color:var(--line-2);color:var(--oxford)}
+.tabs button .badge{display:inline-block;min-width:19px;padding:0 5px;margin-left:5px;border-radius:99px;background:var(--crimson);
+      color:#fff;font-size:11px;line-height:18px;text-align:center}
+.pane{display:none;padding:16px}
+.pane.on{display:block}
+
+/* ---------------- report ---------------- */
+.gradebox{display:flex;align-items:center;gap:16px;padding:16px;border:1px solid var(--line);border-radius:12px;
+     background:linear-gradient(135deg,#fff,var(--gold-soft));margin-bottom:14px}
+.gradeltr{font-family:var(--serif);font-size:52px;font-weight:700;line-height:1;color:var(--crimson);letter-spacing:-.02em}
+.gradeinfo .n{font-size:26px;font-weight:800;letter-spacing:-.01em}
+.gradeinfo .n small{font-size:14px;color:var(--muted);font-weight:700}
+.gradeinfo .lab{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.07em}
+.cefr{margin-left:auto;text-align:center;border-left:1px solid var(--line);padding-left:16px}
+.cefr .v{font-family:var(--serif);font-size:28px;font-weight:700;color:var(--oxford)}
+.cefr .l{font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.07em}
+.bars{display:grid;gap:11px;margin-bottom:16px}
+.bar .r{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px}
+.bar .r b{font-weight:700}
+.bar .r .v{font-weight:800;font-variant-numeric:tabular-nums}
+.bar .track{height:9px;background:#efe9dd;border-radius:99px;overflow:hidden}
+.bar .fill{height:100%;border-radius:99px;transition:width .5s cubic-bezier(.2,.7,.3,1)}
+.bar .note{font-size:11.5px;color:var(--muted);margin-top:3px}
+.tutorial{font-family:var(--serif);font-size:15.5px;line-height:1.75}
+.tutorial h3{font-family:var(--sans);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--crimson);
+     margin:18px 0 7px;font-weight:800}
+.tutorial h3:first-child{margin-top:0}
+.tutorial p{margin-bottom:10px}
+.tutorial ul{margin:0 0 10px 20px}
+.tutorial li{margin-bottom:6px}
+.tutorial q{color:var(--oxford);font-style:italic}
+.tutorial q:before{content:'“'} .tutorial q:after{content:'”'}
+.sig{margin-top:20px;padding-top:12px;border-top:1px solid var(--line-2);font-family:var(--serif);font-style:italic;
+     color:var(--muted);font-size:14px}
+
+/* ---------------- findings ---------------- */
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:99px;padding:4px 11px;font-size:12.5px;font-weight:700;color:var(--muted)}
+.chip.on{background:var(--oxford);border-color:var(--oxford);color:#fff}
+.issue{border:1px solid var(--line);border-left:4px solid var(--line);border-radius:11px;padding:12px 13px;margin-bottom:10px;background:#fff}
+.issue.sel{box-shadow:0 0 0 3px #ffe9a8}
+.issue.c-grammar{border-left-color:var(--grammar)} .issue.c-spelling{border-left-color:var(--spelling)}
+.issue.c-punct{border-left-color:var(--punct)} .issue.c-style{border-left-color:var(--style)}
+.issue.c-register{border-left-color:var(--register)} .issue.c-vocab{border-left-color:var(--vocab)}
+.issue .top-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:6px}
+.issue .tag{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:5px;
+     background:#f1ece1;color:var(--muted)}
+.issue.c-grammar .tag{background:var(--crimson-soft);color:var(--grammar)}
+.issue.c-spelling .tag{background:#fdf0dc;color:#a75c05}
+.issue.c-punct .tag{background:#e7efff;color:#1d4ed8}
+.issue.c-style .tag{background:#f1e9ff;color:#6d28d9}
+.issue.c-register .tag{background:#dcf5f1;color:#0b7a70}
+.issue.c-vocab .tag{background:#e4f5e6;color:#146c31}
+.issue .sev{font-size:10.5px;font-weight:800;color:var(--muted)}
+.issue h4{font-size:13.5px;font-weight:800;flex:1;min-width:120px}
+.issue .quote{font-family:var(--serif);font-size:15px;background:#fbf8f1;border:1px dashed var(--line);border-radius:8px;
+     padding:7px 10px;margin-bottom:7px;word-break:break-word}
+.issue .quote s{color:var(--grammar);text-decoration-thickness:2px}
+.issue .quote i{color:var(--ok);font-style:normal;font-weight:700}
+.issue .msg{font-size:13.5px;color:#3c4759;margin-bottom:8px}
+.issue .why{font-size:12.5px;color:var(--muted);border-left:2px solid var(--line);padding-left:9px;margin-bottom:9px}
+.issue .fixes{display:flex;gap:6px;flex-wrap:wrap}
+.fixbtn{border:1px solid #cfe3d6;background:var(--ok-soft);color:#125c37;border-radius:8px;padding:5px 10px;font-size:13px;
+     font-weight:700;font-family:var(--serif)}
+.fixbtn:hover{background:#d5ecdf}
+.fixbtn.gone{opacity:.5;cursor:default}
+.jump{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 9px;font-size:12px;font-weight:700;color:var(--muted)}
+
+/* ---------------- thesaurus ---------------- */
+.lookup{display:flex;gap:8px;margin-bottom:12px}
+.lookup input{flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font-family:var(--serif);font-size:16px}
+.lookup input:focus{outline:2px solid var(--oxford);outline-offset:-1px}
+.synhead{font-family:var(--serif);font-size:22px;font-weight:700;margin-bottom:2px}
+.synhead small{font-family:var(--sans);font-size:12px;color:var(--muted);font-weight:600;margin-left:8px}
+.syngroup{margin-bottom:14px}
+.syngroup .gl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--crimson);margin-bottom:6px}
+.syn{display:inline-flex;flex-direction:column;gap:1px;border:1px solid var(--line);border-radius:10px;padding:7px 11px;margin:0 7px 7px 0;
+     background:#fff;text-align:left;transition:background .15s,border-color .15s}
+.syn:hover{background:var(--gold-soft);border-color:#e8d3a0}
+.syn .t{font-family:var(--serif);font-size:15.5px;font-weight:700}
+.syn .n{font-size:11.5px;color:var(--muted)}
+.regchip{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:1px 5px;border-radius:4px;margin-left:6px;vertical-align:1px}
+.reg-formal{background:#e7efff;color:#1d4ed8} .reg-neutral{background:#eef0f2;color:#5b6472}
+.reg-informal{background:#fdf0dc;color:#a75c05} .reg-academic{background:var(--crimson-soft);color:var(--crimson)}
+.ctxbox{background:#fbf8f1;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:13px}
+.ctxbox b{font-family:var(--serif)}
+
+/* ---------------- history ---------------- */
+.hrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line-2);font-size:13px}
+.hrow:last-child{border-bottom:0}
+.hrow .d{color:var(--muted);font-size:12px;width:112px;flex-shrink:0}
+.hrow .g{font-family:var(--serif);font-weight:700;font-size:17px;color:var(--crimson);width:34px}
+.hrow .t{flex:1;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hbar{height:6px;border-radius:99px;background:#efe9dd;width:90px;overflow:hidden;flex-shrink:0}
+.hbar i{display:block;height:100%;background:var(--oxford)}
+
+/* ---------------- misc ---------------- */
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(24px);background:var(--oxford-ink);color:#fff;
+     padding:11px 18px;border-radius:11px;font-size:13.5px;font-weight:600;box-shadow:0 12px 34px rgba(0,23,48,.35);
+     opacity:0;pointer-events:none;transition:opacity .22s,transform .22s;z-index:90;max-width:90vw;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.hint{font-size:12.5px;color:var(--muted)}
+.side-note{background:#fbf8f1;border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:0 10px 10px 0;
+     padding:10px 12px;font-size:12.5px;color:#4a5365;margin-bottom:14px}
+.diffbox{font-family:var(--serif);font-size:16px;line-height:1.85;white-space:pre-wrap;word-wrap:break-word;background:#fbf8f1;
+     border:1px solid var(--line);border-radius:10px;padding:14px;max-height:52vh;overflow:auto}
+.diffbox ins{background:#dff3e6;color:#125c37;text-decoration:none;border-radius:3px;padding:0 2px}
+
+@media (max-width:960px){
+  .cols{grid-template-columns:1fr}
+  .top h1{font-size:16.5px}
+  #editor{font-size:16px;min-height:230px}
+  #preview{font-size:16px;line-height:1.95;max-height:none}
+  .gradeltr{font-size:42px}
+}
+@media print{
+  .top,.tabs,.toolrow,.meter,.legend,.filters,#editorCard,#previewCard,.no-print{display:none!important}
+  body{background:#fff} .wrap{padding:0;max-width:none} .cols{display:block}
+  .card{border:0;box-shadow:none;margin:0} .pane{display:none!important} .pane#pane-report{display:block!important;padding:0}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="crest">🪶</div>
+  <div class="who">
+    <h1>Prof. Quill</h1>
+    <div class="sub">English Writing Tutorial</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="topctl">
+    <div class="selwrap">
+      <label for="mode">Gaya</label>
+      <select id="mode">
+        <option value="academic">Akademik / Esai</option>
+        <option value="business">Bisnis / Email</option>
+        <option value="exam">IELTS / TOEFL</option>
+        <option value="casual">Santai / Sehari-hari</option>
+      </select>
+    </div>
+    <button class="btn btn-ghost btn-sm" id="btnSample">Contoh teks</button>
+    <button class="btn btn-ghost btn-sm" id="btnClear">Kosongkan</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="cols">
+
+    <!-- ============ LEFT ============ -->
+    <div>
+      <div class="card" id="editorCard">
+        <div class="head">
+          <h2>✍️ Tulisan Anda</h2>
+          <div class="spacer"></div>
+          <span class="hint" id="autosaveNote">Tersimpan otomatis di perangkat ini</span>
+        </div>
+        <textarea id="editor" spellcheck="false" placeholder="Tulis atau tempel paragraf bahasa Inggris Anda di sini, lalu tekan Periksa & Nilai.
+
+Contoh: In my opinion, I think that the goverment should to give more attention on education, because the quality of teacher in rural area are still very low."></textarea>
+        <div class="meter">
+          <span><b id="mWords">0</b> kata</span>
+          <span><b id="mChars">0</b> karakter</span>
+          <span><b id="mSents">0</b> kalimat</span>
+          <span><b id="mPara">0</b> paragraf</span>
+          <span><b id="mRead">0 dtk</b> waktu baca</span>
+        </div>
+        <div class="toolrow">
+          <button class="btn btn-primary" id="btnCheck">🎓 Periksa &amp; Nilai</button>
+          <button class="btn btn-gold" id="btnFixAll">✨ Perbaiki semua yang aman</button>
+          <button class="btn" id="btnCopy">📋 Salin teks</button>
+          <button class="btn" id="btnPrint">🖨️ Cetak laporan</button>
+        </div>
+      </div>
+
+      <div class="card" id="previewCard">
+        <div class="head">
+          <h2>🔍 Teks bertanda</h2>
+          <div class="spacer"></div>
+          <span class="hint">Klik tanda untuk penjelasan · klik kata biasa untuk sinonim</span>
+        </div>
+        <div class="legend" id="legend"></div>
+        <div id="preview"><div class="empty">Belum ada analisis. Tekan <b>Periksa &amp; Nilai</b> untuk melihat tanda kesalahan di sini.</div></div>
+      </div>
+    </div>
+
+    <!-- ============ RIGHT ============ -->
+    <div>
+      <div class="card">
+        <div class="tabs" id="tabs">
+          <button data-tab="report" class="active">🎓 Laporan Profesor</button>
+          <button data-tab="issues">📌 Temuan <span class="badge" id="badgeIssues">0</span></button>
+          <button data-tab="syn">📖 Sinonim</button>
+          <button data-tab="rewrite">📝 Draf Perbaikan</button>
+          <button data-tab="history">📈 Riwayat</button>
+        </div>
+
+        <div class="pane on" id="pane-report">
+          <div class="empty">Laporan penilaian akan muncul di sini setelah Anda menekan <b>Periksa &amp; Nilai</b>.</div>
+        </div>
+
+        <div class="pane" id="pane-issues">
+          <div class="filters" id="filters"></div>
+          <div id="issueList"><div class="empty">Belum ada temuan.</div></div>
+        </div>
+
+        <div class="pane" id="pane-syn">
+          <div class="lookup">
+            <input id="synInput" placeholder="Ketik kata bahasa Inggris, mis. important" autocomplete="off" spellcheck="false">
+            <button class="btn btn-primary" id="btnSyn">Cari</button>
+          </div>
+          <div id="synOut"><div class="empty">Cari sinonim, atau klik kata mana pun di panel <b>Teks bertanda</b> untuk melihat pilihan kata yang lebih tepat.</div></div>
+        </div>
+
+        <div class="pane" id="pane-rewrite">
+          <div class="side-note">Draf ini dibuat dengan menerapkan seluruh koreksi berkeyakinan tinggi (grammar, ejaan, tanda baca).
+            Saran gaya dan kosakata tidak diterapkan otomatis, karena pilihan itu tetap milik penulis.</div>
+          <div id="rewriteOut"><div class="empty">Jalankan pemeriksaan terlebih dahulu.</div></div>
+          <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-gold" id="btnUseRewrite">⬅️ Pakai draf ini</button>
+            <button class="btn" id="btnCopyRewrite">📋 Salin draf</button>
+          </div>
+        </div>
+
+        <div class="pane" id="pane-history">
+          <div class="side-note">Setiap pemeriksaan disimpan agar Anda bisa melihat kemajuan. Data hanya tersimpan di peramban perangkat ini.</div>
+          <div id="historyOut"><div class="empty">Belum ada riwayat.</div></div>
+          <div style="margin-top:12px"><button class="btn btn-sm" id="btnClearHistory">Hapus riwayat</button></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+/* =====================================================================
+   Prof. Quill — offline English grammar/style engine
+   All data and analysis rules below are self-contained, run entirely
+   client-side, and require no network access.
+   ===================================================================== */
+
+/* ===================== DATA ===================== */
+
+const MISSPELLINGS = {
+  "acheive":"achieve",  "acheived":"achieved",  "adress":"address",  "adventerous":"adventurous",
+  "agressive":"aggressive",  "alot":"a lot",  "alright":"all right",  "apparant":"apparent",
+  "arguement":"argument",  "becomeing":"becoming",  "becouse":"because",  "becuase":"because",
+  "begining":"beginning",  "beleive":"believe",  "buisness":"business",  "calender":"calendar",
+  "cemetary":"cemetery",  "changable":"changeable",  "childern":"children",  "collegue":"colleague",
+  "comming":"coming",  "commited":"committed",  "commitement":"commitment",  "concious":"conscious",
+  "curiousity":"curiosity",  "definately":"definitely",  "definetly":"definitely",  "diffrent":"different",
+  "dilema":"dilemma",  "dissapear":"disappear",  "dissapoint":"disappoint",  "embarass":"embarrass",
+  "embarassing":"embarrassing",  "enviroment":"environment",  "enviromental":"environmental",  "excelent":"excellent",
+  "excercise":"exercise",  "existance":"existence",  "exsist":"exist",  "familar":"familiar",
+  "finaly":"finally",  "flourescent":"fluorescent",  "fourty":"forty",  "freind":"friend",
+  "freinds":"friends",  "futher":"further",  "gaurd":"guard",  "glamourous":"glamorous",
+  "goverening":"governing",  "goverment":"government",  "govermental":"governmental",  "grammer":"grammar",
+  "happend":"happened",  "harrass":"harass",  "hienous":"heinous",  "hight":"height",
+  "humourous":"humorous",  "hygene":"hygiene",  "immediatly":"immediately",  "importent":"important",
+  "incidently":"incidentally",  "independant":"independent",  "interupt":"interrupt",  "intresting":"interesting",
+  "irrelevent":"irrelevant",  "jewelery":"jewellery",  "judgement":"judgment",  "kindergarden":"kindergarten",
+  "knowlege":"knowledge",  "libary":"library",  "liesure":"leisure",  "lisence":"license",
+  "lonelyness":"loneliness",  "maintainance":"maintenance",  "medcine":"medicine",  "millenium":"millennium",
+  "miniture":"miniature",  "mischevous":"mischievous",  "mispell":"misspell",  "mysterous":"mysterious",
+  "neccesary":"necessary",  "neccessary":"necessary",  "negitive":"negative",  "nieghbor":"neighbor",
+  "noticable":"noticeable",  "noticably":"noticeably",  "ocassion":"occasion",  "occassion":"occasion",
+  "occassionally":"occasionally",  "occured":"occurred",  "occuring":"occurring",  "ocurred":"occurred",
+  "offical":"official",  "ommision":"omission",  "oppurtunity":"opportunity",  "outragous":"outrageous",
+  "paralel":"parallel",  "parliment":"parliament",  "particurly":"particularly",  "pasttime":"pastime",
+  "peculure":"peculiar",  "peple":"people",  "perseverence":"perseverance",  "persistant":"persistent",
+  "personnell":"personnel",  "playright":"playwright",  "posession":"possession",  "posotive":"positive",
+  "potatoe":"potato",  "practicle":"practical",  "preceeding":"preceding",  "prefered":"preferred",
+  "presance":"presence",  "principel":"principal",  "priviledge":"privilege",  "probaly":"probably",
+  "probobly":"probably",  "proffesional":"professional",  "proffesor":"professor",  "promiss":"promise",
+  "pronounciation":"pronunciation",  "publically":"publicly",  "publicaly":"publicly",  "quanity":"quantity",
+  "questionaire":"questionnaire",  "readible":"readable",  "realy":"really",  "reccomend":"recommend",
+  "recieve":"receive",  "recieved":"received",  "recieving":"receiving",  "referal":"referral",
+  "refered":"referred",  "refering":"referring",  "relevent":"relevant",  "religous":"religious",
+  "relized":"realized",  "remeber":"remember",  "repitition":"repetition",  "resistence":"resistance",
+  "restaraunt":"restaurant",  "rythm":"rhythm",  "sacrafice":"sacrifice",  "saftey":"safety",
+  "seperate":"separate",  "seperated":"separated",  "seperately":"separately",  "similer":"similar",
+  "sincerly":"sincerely",  "speach":"speech",  "strenght":"strength",  "studing":"studying",
+  "succesful":"successful",  "succesfully":"successfully",  "successfull":"successful",  "suprise":"surprise",
+  "suprised":"surprised",  "suprisingly":"surprisingly",  "surelly":"surely",  "tatoo":"tattoo",
+  "tecnology":"technology",  "teh":"the",  "tendancy":"tendency",  "therefor":"therefore",
+  "thier":"their",  "tommorow":"tomorrow",  "tommorrow":"tomorrow",  "tounge":"tongue",
+  "transfered":"transferred",  "truely":"truly",  "twelth":"twelfth",  "tyrany":"tyranny",
+  "underate":"underrate",  "unfortunatly":"unfortunately",  "unneccessary":"unnecessary",  "untill":"until",
+  "upholstary":"upholstery",  "usualy":"usually",  "vaccuum":"vacuum",  "vegatarian":"vegetarian",
+  "wellcome":"welcome",  "wich":"which",  "wieght":"weight",  "wierd":"weird",
+  "writen":"written",  "writting":"writing",  "yatch":"yacht",
+  "dont":"don't",  "cant":"can't",  "wont":"won't",  "isnt":"isn't",
+  "arent":"aren't",  "wasnt":"wasn't",  "werent":"weren't",  "hasnt":"hasn't",
+  "havent":"haven't",  "didnt":"didn't",  "couldnt":"couldn't",  "wouldnt":"wouldn't",
+  "shouldnt":"shouldn't",  "doesnt":"doesn't",  "im":"I'm",  "youre":"you're",
+  "theyre":"they're",  "weve":"we've",  "theyve":"they've",  "hes":"he's",  "shes":"she's"
+};
+
+const THIRD_PERSON_S = {
+  "go":"goes","have":"has","do":"does","want":"wants","need":"needs","like":"likes","make":"makes",
+  "think":"thinks","know":"knows","say":"says","get":"gets","come":"comes","see":"sees","take":"takes",
+  "give":"gives","tell":"tells","feel":"feels","become":"becomes","leave":"leaves","put":"puts",
+  "mean":"means","keep":"keeps","let":"lets","begin":"begins","seem":"seems","help":"helps",
+  "talk":"talks","turn":"turns","start":"starts","show":"shows","hear":"hears","play":"plays",
+  "run":"runs","move":"moves","live":"lives","believe":"believes","bring":"brings","happen":"happens",
+  "write":"writes","sit":"sits","stand":"stands","lose":"loses","pay":"pays","meet":"meets",
+  "include":"includes","continue":"continues","learn":"learns","change":"changes","lead":"leads",
+  "understand":"understands","watch":"watches","follow":"follows","stop":"stops","create":"creates",
+  "speak":"speaks","read":"reads","allow":"allows","add":"adds","spend":"spends","grow":"grows",
+  "open":"opens","walk":"walks","win":"wins","offer":"offers","remember":"remembers","love":"loves",
+  "consider":"considers","appear":"appears","buy":"buys","wait":"waits","serve":"serves","die":"dies",
+  "send":"sends","expect":"expects","build":"builds","stay":"stays","fall":"falls","cut":"cuts",
+  "reach":"reaches","kill":"kills","remain":"remains","affect":"affects","cause":"causes",
+  "prefer":"prefers","suggest":"suggests","increase":"increases","decrease":"decreases",
+  "improve":"improves","support":"supports","provide":"provides","require":"requires"
+};
+
+const AN_EXCEPTIONS = new Set(["university","unique","user","one","european","uniform","unicorn","useful","unit","united","us","usual","utility","utopian"]);
+const A_EXCEPTIONS = new Set(["hour","honest","honor","honour","heir","hourly"]);
+
+const UNCOUNTABLE = new Set(["information","advice","furniture","money","equipment","news","research",
+  "evidence","homework","luggage","traffic","feedback","progress","knowledge","software","staff",
+  "baggage","garbage","jewelry","machinery","scenery","stuff","transportation","vocabulary","weather","work"]);
+const CLEARLY_COUNTABLE = new Set(["people","problems","students","cars","books","friends","ideas",
+  "things","times","reasons","mistakes","issues","options","opportunities","questions","people",
+  "children","cities","countries","jobs","dollars","years","days","members"]);
+
+const COLLOCATIONS = [
+  ["attention on","attention to","\"Attention\" pairs with the preposition \"to\", not \"on\"."],
+  ["married with","married to","In English one is \"married to\" a person, not \"married with\"."],
+  ["depend of","depend on","The verb \"depend\" takes the preposition \"on\"."],
+  ["depends of","depends on","The verb \"depend\" takes the preposition \"on\"."],
+  ["interested about","interested in","\"Interested\" is followed by \"in\", not \"about\"."],
+  ["good in","good at","One is \"good at\" a skill or subject, not \"good in\"."],
+  ["arrive to","arrive at","\"Arrive\" takes \"at\" (a place) or \"in\" (a city/country), not \"to\"."],
+  ["capable to","capable of","\"Capable\" is followed by \"of\", not \"to\"."],
+  ["responsible of","responsible for","\"Responsible\" is followed by \"for\", not \"of\"."],
+  ["listen music","listen to music","\"Listen\" requires the preposition \"to\" before its object."],
+  ["explain about","explain","\"Explain\" is usually not followed by \"about\" before its object."],
+  ["discuss about","discuss","\"Discuss\" is a transitive verb and does not take \"about\"."],
+  ["afraid about","afraid of","One is typically \"afraid of\" something, not \"afraid about\"."],
+  ["compare to results","compare with results","(example placeholder)"],
+  ["consist from","consist of","\"Consist\" takes the preposition \"of\", not \"from\"."],
+  ["according to me","in my opinion","\"According to\" is used for citing outside sources, not one's own view."],
+  ["different than","different from","In formal writing, \"different from\" is generally preferred over \"different than\"."]
+];
+
+const REDUNDANT = [
+  ["the reason is because","the reason is that","\"The reason is because\" is redundant; \"because\" already means \"for the reason that\"."],
+  ["advance planning","planning","\"Planning\" is inherently done in advance."],
+  ["very unique","unique","\"Unique\" is an absolute quality and is not usually graded by \"very\"."],
+  ["more perfect","more nearly perfect","\"Perfect\" is traditionally treated as an absolute."],
+  ["actual fact","fact","\"Actual\" adds no meaning here."],
+  ["close proximity","proximity","\"Proximity\" already means closeness."],
+  ["each and every","each","The pair is redundant; one word is enough."],
+  ["past history","history","\"History\" is, by definition, past."],
+  ["future plans","plans","Plans are inherently about the future."],
+  ["unexpected surprise","surprise","A surprise is by definition unexpected."],
+  ["repeat again","repeat","\"Repeat\" already implies doing something again."],
+  ["basic fundamentals","fundamentals","\"Fundamentals\" are already basic."],
+  ["free gift","gift","A gift is given freely by definition."],
+  ["final outcome","outcome","An outcome is, by definition, final."],
+  ["end result","result","A result occurs at the end of a process."],
+  ["absolutely essential","essential","\"Essential\" is already an absolute quality."],
+  ["completely finished","finished","\"Finished\" already implies completeness."]
+];
+
+const INFORMAL_WORDS = {
+  "gonna":"going to","wanna":"want to","gotta":"have to","kinda":"kind of","sorta":"sort of",
+  "dunno":"do not know","ain't":"is not / are not","yeah":"yes","cuz":"because","u":"you",
+  "ur":"your","plz":"please","thx":"thanks","btw":"by the way"
+};
+
+const REGISTER_INFORMAL = {
+  "kids":"children","guys":"individuals","stuff":"materials","a lot of":"a considerable amount of",
+  "big":"significant","get":"obtain","huge":"substantial","okay":"acceptable","totally":"entirely",
+  "awesome":"excellent","cool":"favourable","nowadays":"currently","thing":"matter"
+};
+
+const OVERUSED_VOCAB = ["good","bad","nice","big","small","said","happy","sad","interesting",
+  "important","very","a lot","get","got","make","think","show","help","thing","things",
+  "difficult","easy","problem","idea","change","increase","decrease","start","begin","end","because","but","also"];
+
+const THESAURUS = {
+  "good":[{sense:"of high quality",syns:[["excellent","formal"],["outstanding","formal"],["admirable","academic"],["fine","neutral"],["solid","informal"]]},
+          {sense:"morally right",syns:[["virtuous","academic"],["upright","formal"],["decent","neutral"]]}],
+  "bad":[{sense:"of poor quality",syns:[["poor","neutral"],["inadequate","formal"],["deficient","academic"],["substandard","formal"],["awful","informal"]]},
+         {sense:"morally wrong",syns:[["immoral","academic"],["unethical","formal"],["wicked","neutral"]]}],
+  "nice":[{sense:"pleasant",syns:[["pleasant","neutral"],["agreeable","formal"],["delightful","formal"],["charming","neutral"]]}],
+  "big":[{sense:"large in size",syns:[["large","neutral"],["substantial","formal"],["considerable","academic"],["extensive","formal"],["sizeable","neutral"]]}],
+  "small":[{sense:"limited in size",syns:[["minor","neutral"],["modest","formal"],["limited","academic"],["negligible","formal"],["slight","neutral"]]}],
+  "said":[{sense:"spoke",syns:[["stated","formal"],["remarked","neutral"],["observed","academic"],["noted","academic"],["asserted","formal"]]}],
+  "happy":[{sense:"pleased",syns:[["pleased","neutral"],["content","neutral"],["delighted","formal"],["gratified","academic"]]}],
+  "sad":[{sense:"unhappy",syns:[["unhappy","neutral"],["sorrowful","formal"],["dejected","academic"],["regrettable (of a situation)","formal"]]}],
+  "interesting":[{sense:"engaging attention",syns:[["compelling","academic"],["noteworthy","formal"],["intriguing","neutral"],["engaging","neutral"]]}],
+  "important":[{sense:"of great significance",syns:[["significant","academic"],["essential","formal"],["crucial","neutral"],["paramount","formal"],["pivotal","academic"]]}],
+  "very":[{sense:"to a high degree",syns:[["highly","formal"],["remarkably","academic"],["exceedingly","formal"],["notably","neutral"]]}],
+  "a lot":[{sense:"a large quantity",syns:[["a great deal","formal"],["substantially","academic"],["considerably","formal"],["numerous (for countables)","academic"]]}],
+  "get":[{sense:"to obtain",syns:[["obtain","formal"],["acquire","academic"],["receive","neutral"],["secure","formal"]]}],
+  "got":[{sense:"obtained",syns:[["obtained","formal"],["acquired","academic"],["received","neutral"]]}],
+  "make":[{sense:"to produce",syns:[["produce","neutral"],["generate","academic"],["create","neutral"],["construct","formal"]]}],
+  "think":[{sense:"to hold an opinion",syns:[["believe","neutral"],["contend","academic"],["maintain","formal"],["argue","academic"]]}],
+  "show":[{sense:"to demonstrate",syns:[["demonstrate","formal"],["illustrate","academic"],["reveal","neutral"],["indicate","academic"]]}],
+  "help":[{sense:"to assist",syns:[["assist","formal"],["facilitate","academic"],["support","neutral"],["aid","formal"]]}],
+  "thing":[{sense:"an unspecified item",syns:[["matter","neutral"],["aspect","academic"],["element","neutral"],["factor","academic"]]}],
+  "things":[{sense:"unspecified items",syns:[["matters","neutral"],["aspects","academic"],["elements","neutral"],["factors","academic"]]}],
+  "difficult":[{sense:"hard to do",syns:[["challenging","neutral"],["demanding","formal"],["arduous","academic"],["complex","neutral"]]}],
+  "easy":[{sense:"not difficult",syns:[["straightforward","neutral"],["simple","neutral"],["effortless","formal"],["accessible","academic"]]}],
+  "problem":[{sense:"a difficulty",syns:[["issue","neutral"],["difficulty","neutral"],["challenge","neutral"],["predicament","formal"]]}],
+  "idea":[{sense:"a thought or concept",syns:[["concept","academic"],["notion","formal"],["proposal","neutral"],["premise","academic"]]}],
+  "change":[{sense:"to make different",syns:[["alter","formal"],["modify","academic"],["transform","neutral"],["adjust","neutral"]]}],
+  "increase":[{sense:"to become greater",syns:[["rise","neutral"],["grow","neutral"],["escalate","formal"],["intensify","academic"]]}],
+  "decrease":[{sense:"to become smaller",syns:[["decline","neutral"],["diminish","formal"],["reduce","academic"],["dwindle","neutral"]]}],
+  "start":[{sense:"to begin",syns:[["begin","neutral"],["commence","formal"],["initiate","academic"],["launch","neutral"]]}],
+  "begin":[{sense:"to start",syns:[["commence","formal"],["initiate","academic"],["start","neutral"]]}],
+  "end":[{sense:"to stop or finish",syns:[["conclude","formal"],["terminate","academic"],["finish","neutral"],["cease","formal"]]}],
+  "because":[{sense:"for the reason that",syns:[["since","neutral"],["as","neutral"],["given that","formal"],["owing to the fact that","academic"]]}],
+  "but":[{sense:"in contrast",syns:[["however","formal"],["yet","neutral"],["nevertheless","academic"],["although","neutral"]]}],
+  "also":[{sense:"in addition",syns:[["furthermore","formal"],["moreover","academic"],["additionally","formal"],["likewise","neutral"]]}],
+  "important-note":[]
+};
+
+const IRREGULAR_PAST_PARTICIPLE = new Set(["been","done","made","seen","taken","given","known","written",
+  "spoken","broken","chosen","driven","eaten","fallen","forgotten","gotten","hidden","ridden","risen",
+  "shaken","stolen","thrown","worn","begun","drunk","rung","sung","sunk","swum","found","bought","brought",
+  "caught","fought","sought","taught","thought","built","felt","kept","left","meant","met","sent","spent",
+  "understood","held","told","sold","said","paid","heard","read","led","lost","won","put","cut","hit","let",
+  "shut","hurt","cost","set"]);
+
+/* ===================== ENGINE ===================== */
+
+const CATEGORY_PRIORITY = { grammar:6, spelling:5, register:4, punct:3, style:2, vocab:1 };
+
+function pushIssue(list, o) {
+  list.push(o);
+}
+
+function isWordChar(ch){ return /[A-Za-z']/.test(ch); }
+
+/* ---------- rule: spelling ---------- */
+function checkSpelling(text, issues) {
+  const re = /[A-Za-z']+/g;
+  let m;
+  while ((m = re.exec(text))) {
+    const word = m[0];
+    const lower = word.toLowerCase();
+    if (MISSPELLINGS[lower]) {
+      let correction = MISSPELLINGS[lower];
+      // preserve capitalisation of first letter
+      if (word[0] === word[0].toUpperCase() && word[0] !== word[0].toLowerCase()) {
+        correction = correction[0].toUpperCase() + correction.slice(1);
+      }
+      pushIssue(issues, {
+        start: m.index, end: m.index + word.length, category: "spelling", severity: "error",
+        title: "Misspelled word", match: word, fixes: [correction],
+        message: `"${word}" appears to be misspelled.`,
+        why: `The conventional spelling is "${correction}".`
+      });
+    }
+  }
+}
+
+/* ---------- rule: a/an ---------- */
+function checkArticles(text, issues) {
+  let re = /\ba\s+([A-Za-z]+)/g, m;
+  while ((m = re.exec(text))) {
+    const noun = m[1].toLowerCase();
+    if (AN_EXCEPTIONS.has(noun)) continue;
+    if (/^[aeiou]/i.test(noun)) {
+      pushIssue(issues, {
+        start: m.index, end: m.index + m[0].length, category: "grammar", severity: "error",
+        title: "Article agreement", match: m[0], fixes: ["an " + m[1]],
+        message: `Use "an" before a word that begins with a vowel sound.`,
+        why: `"${m[1]}" starts with a vowel sound, so the article "a" should be "an".`
+      });
+    }
+  }
+  re = /\ban\s+([A-Za-z]+)/g;
+  while ((m = re.exec(text))) {
+    const noun = m[1].toLowerCase();
+    if (A_EXCEPTIONS.has(noun)) continue;
+    if (!/^[aeiou]/i.test(noun)) {
+      pushIssue(issues, {
+        start: m.index, end: m.index + m[0].length, category: "grammar", severity: "error",
+        title: "Article agreement", match: m[0], fixes: ["a " + m[1]],
+        message: `Use "a" before a word that begins with a consonant sound.`,
+        why: `"${m[1]}" starts with a consonant sound, so the article "an" should be "a".`
+      });
+    }
+  }
+}
+
+/* ---------- rule: pronoun + be/have/do agreement ---------- */
+const BE_PRESENT = { i:"am", he:"is", she:"is", it:"is", you:"are", we:"are", they:"are" };
+const BE_PAST = { i:"was", he:"was", she:"was", it:"was", you:"were", we:"were", they:"were" };
+const HAVE_PRESENT = { i:"have", he:"has", she:"has", it:"has", you:"have", we:"have", they:"have" };
+const DO_PRESENT = { i:"do", he:"does", she:"does", it:"does", you:"do", we:"do", they:"do" };
+
+function checkPronounAgreement(text, issues) {
+  const tables = [
+    { forms: ["am","is","are"], map: BE_PRESENT, label: "the verb \"to be\" (present tense)" },
+    { forms: ["was","were"], map: BE_PAST, label: "the verb \"to be\" (past tense)" },
+    { forms: ["have","has"], map: HAVE_PRESENT, label: "the verb \"to have\"" },
+    { forms: ["do","does"], map: DO_PRESENT, label: "the auxiliary verb \"to do\"" }
+  ];
+  for (const table of tables) {
+    const alt = table.forms.join("|");
+    const re = new RegExp(`\\b(I|he|she|it|you|we|they)\\s+(${alt})\\b`, "gi");
+    let m;
+    while ((m = re.exec(text))) {
+      const pronoun = m[1].toLowerCase();
+      const verbUsed = m[2].toLowerCase();
+      // subjunctive exception: "if I were" / "as if it were" is standard, don't flag
+      if (verbUsed === "were" && table === tables[1]) continue;
+      const correct = table.map[pronoun];
+      if (correct && correct !== verbUsed) {
+        pushIssue(issues, {
+          start: m.index, end: m.index + m[0].length, category: "grammar", severity: "error",
+          title: "Subject–verb agreement", match: m[0], fixes: [m[1] + " " + correct],
+          message: `"${m[1]}" does not agree with "${m[2]}".`,
+          why: `With the subject "${m[1]}", ${table.label} takes the form "${correct}".`
+        });
+      }
+    }
+  }
+}
+
+/* ---------- rule: he/she/it + base verb (missing 3rd-person -s) ---------- */
+function checkThirdPersonS(text, issues) {
+  const verbs = Object.keys(THIRD_PERSON_S).join("|");
+  const re = new RegExp(`\\b(He|She|It|This|That)\\s+(${verbs})\\b`, "g");
+  let m;
+  while ((m = re.exec(text))) {
+    const base = m[2].toLowerCase();
+    const correctForm = THIRD_PERSON_S[base];
+    pushIssue(issues, {
+      start: m.index, end: m.index + m[0].length, category: "grammar", severity: "error",
+      title: "Subject–verb agreement", match: m[0], fixes: [m[1] + " " + correctForm],
+      message: `The verb needs the third-person singular "-s" ending after "${m[1]}".`,
+      why: `Singular subjects such as "he", "she" and "it" require "${correctForm}", not "${m[2]}".`
+    });
+  }
+}
+
+/* ---------- rule: determiner + singular noun + are/were (heuristic) ---------- */
+const PLURAL_NO_S = new Set(["people","children","men","women","police","sheep","fish","series","species","media","data","criteria","phenomena"]);
+function checkDeterminerNounVerb(text, issues) {
+  const re = /\b(a|an|the|this|one)\s+(?:([A-Za-z]+)\s+)?([A-Za-z]+)\s+(are|were)\b/gi;
+  let m;
+  while ((m = re.exec(text))) {
+    const adj = m[2] ? m[2].toLowerCase() : "";
+    const noun = m[3].toLowerCase();
+    if (noun.endsWith("s") || PLURAL_NO_S.has(noun)) continue;
+    // avoid treating "are/were" itself, or a second determiner/verb, as the "adjective" slot
+    if (adj && (adj.endsWith("s") || ["are","were","is","was","and","or","of","to"].includes(adj))) continue;
+    const subject = (m[2] ? m[2] + " " : "") + m[3];
+    const suggestion = m[4].toLowerCase() === "are" ? "is" : "was";
+    pushIssue(issues, {
+      start: m.index, end: m.index + m[0].length, category: "grammar", severity: "suggestion",
+      title: "Possible subject–verb agreement slip", match: m[0], fixes: [m[1] + " " + subject + " " + suggestion],
+      message: `Check whether "${noun}" is meant to be singular here.`,
+      why: `"${m[1]} ${subject}" reads as a singular subject, which would normally take "${suggestion}" rather than "${m[4]}".`
+    });
+  }
+}
+
+/* ---------- rule: modal + to + verb ---------- */
+function checkModalTo(text, issues) {
+  const re = /\b(should|must|can|will|would|could|might|shall)\s+to\b/gi;
+  let m;
+  while ((m = re.exec(text))) {
+    pushIssue(issues, {
+      start: m.index, end: m.index + m[0].length, category: "grammar", severity: "error",
+      title: "Modal verb followed by \"to\"", match: m[0], fixes: [m[1]],
+      message: `Modal verbs such as "${m[1]}" are followed directly by the base verb, without "to".`,
+      why: `Standard English does not insert "to" after a modal auxiliary (e.g. "should go", not "should to go").`
+    });
+  }
+}
+
+/* ---------- rule: double negatives ---------- */
+function checkDoubleNegative(text, issues) {
+  const neg = "don't|doesn't|didn't|can't|cannot|won't|isn't|aren't|wasn't|weren't|haven't|hasn't|hadn't|dont|doesnt|didnt|cant|wont|isnt|arent|wasnt|werent|havent|hasnt|hadnt";
+  const negShort = "don't|doesn't|didn't|can't|cannot|won't|dont|doesnt|didnt|cant|wont";
+  const patterns = [
+    [new RegExp(`\\b(${neg})\\s+(\\w+\\s+)?no\\b`, "gi"), "no"],
+    [new RegExp(`\\b(${negShort})\\s+(\\w+\\s+)?nothing\\b`, "gi"), "nothing"],
+    [new RegExp(`\\b(${negShort})\\s+(\\w+\\s+)?nobody\\b`, "gi"), "nobody"],
+    [/\b(can't|cannot|couldn't|cant|couldnt)\s+hardly\b/gi, "hardly"],
+    [/\bnot\s+never\b/gi, "never"]
+  ];
+  for (const [re] of patterns) {
+    let m;
+    while ((m = re.exec(text))) {
+      pushIssue(issues, {
+        start: m.index, end: m.index + m[0].length, category: "grammar", severity: "error",
+        title: "Double negative", match: m[0], fixes: [],
+        message: `This sentence combines two negative words, which is non-standard in formal English.`,
+        why: `Standard English uses a single negation per clause (e.g. "doesn't have any", not "doesn't have no").`
+      });
+    }
+  }
+}
+
+/* ---------- rule: double comparative/superlative ---------- */
+function checkDoubleComparative(text, issues) {
+  const re = /\b(more|most)\s+(\w+er|\w+est)\b/gi;
+  let m;
+  while ((m = re.exec(text))) {
+    const word = m[2].toLowerCase();
+    if (!/(er|est)$/.test(word)) continue;
+    if (["other","water","order","proper","matter","number","member","letter","summer","winter","paper","offer","under","after"].includes(word)) continue;
+    const base = word.replace(/est$/, "").replace(/er$/, "");
+    pushIssue(issues, {
+      start: m.index, end: m.index + m[0].length, category: "grammar", severity: "error",
+      title: "Double comparison", match: m[0], fixes: [m[2]],
+      message: `"${m[1]} ${m[2]}" doubles the comparison.`,
+      why: `"${m[2]}" is already comparative or superlative, so "${m[1]}" is not needed.`
+    });
+  }
+}
+
+/* ---------- rule: much/many + countable/uncountable, less/fewer ---------- */
+function checkQuantifiers(text, issues) {
+  let re = /\bmuch\s+([A-Za-z]+)/gi, m;
+  while ((m = re.exec(text))) {
+    const noun = m[1].toLowerCase();
+    if (CLEARLY_COUNTABLE.has(noun) || noun.endsWith("s")) {
+      pushIssue(issues, {
+        start: m.index, end: m.index + m[0].length, category: "grammar", severity: "error",
+        title: "Countable/uncountable quantifier", match: m[0], fixes: ["many " + m[1]],
+        message: `"${noun}" is a countable noun, so it takes "many", not "much".`,
+        why: `"Much" is reserved for uncountable nouns (e.g. "much information"); countable plural nouns take "many".`
+      });
+    }
+  }
+  re = /\bmany\s+([A-Za-z]+)/gi;
+  while ((m = re.exec(text))) {
+    const noun = m[1].toLowerCase();
+    if (UNCOUNTABLE.has(noun)) {
+      pushIssue(issues, {
+        start: m.index, end: m.index + m[0].length, category: "grammar", severity: "error",
+        title: "Countable/uncountable quantifier", match: m[0], fixes: ["much " + m[1]],
+        message: `"${noun}" is normally treated as uncountable, so it takes "much", not "many".`,
+        why: `Uncountable nouns (e.g. "${noun}") do not take a plural quantifier like "many".`
+      });
+    }
+  }
+  re = /\bless\s+([A-Za-z]+)/gi;
+  while ((m = re.exec(text))) {
+    const noun = m[1].toLowerCase();
+    if (CLEARLY_COUNTABLE.has(noun) || noun.endsWith("s")) {
+      pushIssue(issues, {
+        start: m.index, end: m.index + m[0].length, category: "grammar", severity: "error",
+        title: "\"Less\" vs \"fewer\"", match: m[0], fixes: ["fewer " + m[1]],
+        message: `"${noun}" is countable, so it takes "fewer", not "less".`,
+        why: `"Less" describes quantity of uncountable nouns; countable plural nouns take "fewer".`
+      });
+    }
+  }
+}
+
+/* ---------- rule: collocations ---------- */
+function checkCollocations(text, issues) {
+  for (const [wrong, right, note] of COLLOCATIONS) {
+    const re = new RegExp("\\b" + wrong.replace(/[.*+?^${}()|[\]\\]/g, "\\CORE_ENGINE_PLACEHOLDER") + "\\b", "gi");
+    let m;
+    while ((m = re.exec(text))) {
+      pushIssue(issues, {
+        start: m.index, end: m.index + m[0].length, category: "grammar", severity: "error",
+        title: "Preposition / collocation", match: m[0], fixes: [right],
+        message: `"${m[0]}" is not the conventional pairing in English.`,
+        why: note
+      });
+    }
+  }
+}
+
+/* ---------- rule: redundant / wordy phrases ---------- */
+function checkRedundant(text, issues) {
+  for (const [wrong, right, note] of REDUNDANT) {
+    const re = new RegExp("\\b" + wrong.replace(/[.*+?^${}()|[\]\\]/g, "\\CORE_ENGINE_PLACEHOLDER") + "\\b", "gi");
+    let m;
+    while ((m = re.exec(text))) {
+      pushIssue(issues, {
+        start: m.index, end: m.index + m[0].length, category: "style", severity: "suggestion",
+        title: "Redundant phrasing", match: m[0], fixes: [right],
+        message: `"${m[0]}" contains a redundancy.`,
+        why: note
+      });
+    }
+  }
+}
+
+/* ---------- rule: informal contractions (gonna, wanna...) ---------- */
+function checkInformalWords(text, issues) {
+  const words = Object.keys(INFORMAL_WORDS).map(w => w.replace(/'/g, "['’]"));
+  const re = new RegExp("\\b(" + words.join("|") + ")\\b", "gi");
+  let m;
+  while ((m = re.exec(text))) {
+    const key = m[1].toLowerCase().replace(/’/g, "'");
+    const proper = INFORMAL_WORDS[key];
+    if (!proper) continue;
+    pushIssue(issues, {
+      start: m.index, end: m.index + m[0].length, category: "register", severity: "error",
+      title: "Informal / colloquial form", match: m[0], fixes: [proper],
+      message: `"${m[0]}" is a spoken, colloquial form.`,
+      why: `In written English this is normally spelled out as "${proper}".`
+    });
+  }
+}
+
+/* ---------- rule: register — informal vocabulary in academic/business mode ---------- */
+function checkRegisterVocab(text, issues, mode) {
+  if (mode !== "academic" && mode !== "business") return;
+  for (const [word, formal] of Object.entries(REGISTER_INFORMAL)) {
+    const re = new RegExp("\\b" + word.replace(/[.*+?^${}()|[\]\\]/g, "\\CORE_ENGINE_PLACEHOLDER") + "\\b", "gi");
+    let m;
+    while ((m = re.exec(text))) {
+      pushIssue(issues, {
+        start: m.index, end: m.index + m[0].length, category: "register", severity: "suggestion",
+        title: "Register / formality", match: m[0], fixes: [formal],
+        message: `"${m[0]}" reads as somewhat informal for ${mode === "academic" ? "academic" : "business"} writing.`,
+        why: `Consider a more formal alternative such as "${formal}".`
+      });
+    }
+  }
+  // contractions
+  const re = /\b\w+(n't|'re|'ve|'ll|'m|'d)\b/gi;
+  let m;
+  while ((m = re.exec(text))) {
+    if (/^(let's)$/i.test(m[0])) continue;
+    pushIssue(issues, {
+      start: m.index, end: m.index + m[0].length, category: "register", severity: "suggestion",
+      title: "Contraction in formal writing", match: m[0], fixes: [],
+      message: `Contractions such as "${m[0]}" are usually avoided in ${mode === "academic" ? "academic" : "business"} writing.`,
+      why: `Consider spelling the words out in full for a more formal register.`
+    });
+  }
+}
+
+/* ---------- rule: lowercase "i" ---------- */
+function checkLowercaseI(text, issues) {
+  const re = /\bi\b/g;
+  let m;
+  while ((m = re.exec(text))) {
+    pushIssue(issues, {
+      start: m.index, end: m.index + 1, category: "grammar", severity: "error",
+      title: "Pronoun capitalisation", match: "i", fixes: ["I"],
+      message: `The pronoun "I" is always capitalised in English.`,
+      why: `This is a fixed orthographic convention, regardless of position in the sentence.`
+    });
+  }
+}
+
+/* ---------- rule: repeated word ---------- */
+function checkRepeatedWord(text, issues) {
+  const re = /\b([A-Za-z]+)([ \t]+)\1\b/gi;
+  let m;
+  while ((m = re.exec(text))) {
+    const w = m[1].toLowerCase();
+    if (["had","that","only"].includes(w)) continue;
+    pushIssue(issues, {
+      start: m.index, end: m.index + m[0].length, category: "grammar", severity: "error",
+      title: "Repeated word", match: m[0], fixes: [m[1]],
+      message: `The word "${m[1]}" appears to be repeated.`,
+      why: `This is very likely a typing slip rather than an intended repetition.`
+    });
+  }
+}
+
+/* ---------- rule: punctuation ---------- */
+function checkPunctuation(text, issues) {
+  let re = /  +/g, m;
+  while ((m = re.exec(text))) {
+    pushIssue(issues, {
+      start: m.index, end: m.index + m[0].length, category: "punct", severity: "error",
+      title: "Extra spacing", match: m[0], fixes: [" "],
+      message: `Multiple consecutive spaces found.`,
+      why: `Standard prose uses a single space between words.`
+    });
+  }
+  re = / +([,.;:!?])/g;
+  while ((m = re.exec(text))) {
+    pushIssue(issues, {
+      start: m.index, end: m.index + m[0].length, category: "punct", severity: "error",
+      title: "Space before punctuation", match: m[0], fixes: [m[1]],
+      message: `There should be no space before "${m[1]}".`,
+      why: `In English typography, punctuation marks attach directly to the preceding word.`
+    });
+  }
+  re = /([,;:])([A-Za-z])/g;
+  while ((m = re.exec(text))) {
+    pushIssue(issues, {
+      start: m.index, end: m.index + m[0].length, category: "punct", severity: "error",
+      title: "Missing space after punctuation", match: m[0], fixes: [m[1] + " " + m[2]],
+      message: `Add a space after "${m[1]}".`,
+      why: `A single space normally follows a comma, semicolon or colon.`
+    });
+  }
+  re = /[!?]{2,}|\.{4,}/g;
+  while ((m = re.exec(text))) {
+    const repl = m[0][0] === "." ? "..." : m[0][0];
+    pushIssue(issues, {
+      start: m.index, end: m.index + m[0].length, category: "punct", severity: "suggestion",
+      title: "Repeated punctuation", match: m[0], fixes: [repl],
+      message: `Repeated punctuation marks are generally avoided in formal writing.`,
+      why: `A single mark (or the standard ellipsis "...") is the conventional form.`
+    });
+  }
+  re = /,\s*,/g;
+  while ((m = re.exec(text))) {
+    pushIssue(issues, {
+      start: m.index, end: m.index + m[0].length, category: "punct", severity: "error",
+      title: "Duplicate comma", match: m[0], fixes: [","],
+      message: `Two commas in a row.`,
+      why: `This is very likely a stray keystroke.`
+    });
+  }
+}
+
+/* ---------- rule: sentence-initial capitalisation ---------- */
+function checkSentenceCase(text, issues) {
+  const re = /(^|[.!?]\s+)([a-z])(\w*)/g;
+  let m;
+  while ((m = re.exec(text))) {
+    // standalone pronoun "i" is already handled (as a grammar issue) by checkLowercaseI
+    if (m[2] === "i" && m[3] === "") continue;
+    const letterIdx = m.index + m[1].length;
+    pushIssue(issues, {
+      start: letterIdx, end: letterIdx + 1, category: "punct", severity: "error",
+      title: "Sentence capitalisation", match: m[2], fixes: [m[2].toUpperCase()],
+      message: `Sentences begin with a capital letter.`,
+      why: `"${m[2]}" begins a new sentence and should be capitalised.`
+    });
+  }
+}
+
+/* ---------- rule: long sentence (style) ---------- */
+function checkLongSentences(text, issues) {
+  const sentences = splitSentences(text);
+  for (const s of sentences) {
+    const words = s.text.trim().split(/\s+/).filter(Boolean);
+    if (words.length > 35) {
+      pushIssue(issues, {
+        start: s.start, end: Math.min(s.start + 60, s.end), category: "style", severity: "suggestion",
+        title: "Long sentence", match: s.text.trim().slice(0, 60) + "…", fixes: [],
+        message: `This sentence runs to about ${words.length} words.`,
+        why: `Consider splitting very long sentences into two for clarity; readers lose the thread past ~30-35 words.`
+      });
+    }
+  }
+}
+
+/* ---------- rule: passive voice (style, mode-gated) ---------- */
+function checkPassiveVoice(text, issues, mode) {
+  if (mode !== "academic" && mode !== "business") return;
+  const re = /\b(is|are|was|were|be|been|being)\s+(\w+ed|\w+en)\b/gi;
+  let m, count = 0;
+  while ((m = re.exec(text)) && count < 6) {
+    const pastPart = m[2].toLowerCase();
+    if (!/(ed|en)$/.test(pastPart)) continue;
+    if (["interested","excited","tired","worried","surprised","involved","concerned","related","based","located"].includes(pastPart)) continue;
+    count++;
+    pushIssue(issues, {
+      start: m.index, end: m.index + m[0].length, category: "style", severity: "suggestion",
+      title: "Passive voice", match: m[0], fixes: [],
+      message: `"${m[0]}" is in the passive voice.`,
+      why: `Active constructions are often more direct; consider naming the agent (e.g. "the committee approved it" rather than "it was approved").`
+    });
+  }
+}
+
+/* ---------- rule: overused vocabulary -> synonym suggestions ---------- */
+function checkOverusedVocab(text, issues, mode) {
+  const seen = {};
+  for (const term of OVERUSED_VOCAB) {
+    const re = new RegExp("\\b" + term.replace(/[.*+?^${}()|[\]\\]/g, "\\CORE_ENGINE_PLACEHOLDER") + "\\b", "gi");
+    let m;
+    while ((m = re.exec(text))) {
+      seen[term] = (seen[term] || 0) + 1;
+      if (seen[term] > 3) continue; // cap repeats per term to avoid clutter
+      const entry = THESAURUS[term.toLowerCase()];
+      const alts = entry ? entry[0].syns.slice(0, 4).map(s => s[0]) : [];
+      pushIssue(issues, {
+        start: m.index, end: m.index + m[0].length, category: "vocab", severity: "suggestion",
+        title: "Word choice", match: m[0], fixes: alts,
+        message: `"${m[0]}" is common but general; a more precise word may strengthen this sentence.`,
+        why: alts.length ? `Consider: ${alts.join(", ")}.` : `Consult the thesaurus panel for alternatives.`
+      });
+    }
+  }
+}
+
+/* ---------- sentence splitting ---------- */
+function splitSentences(text) {
+  const re = /[^.!?]+[.!?]*|\s*$/g;
+  const out = [];
+  let m;
+  while ((m = re.exec(text))) {
+    if (re.lastIndex === m.index) re.lastIndex++;
+    if (m[0].trim().length === 0) continue;
+    out.push({ text: m[0], start: m.index, end: m.index + m[0].length });
+  }
+  return out;
+}
+
+/* ---------- master analyzer ---------- */
+function analyze(text, mode) {
+  const issues = [];
+  checkSpelling(text, issues);
+  checkArticles(text, issues);
+  checkPronounAgreement(text, issues);
+  checkThirdPersonS(text, issues);
+  checkDeterminerNounVerb(text, issues);
+  checkModalTo(text, issues);
+  checkDoubleNegative(text, issues);
+  checkDoubleComparative(text, issues);
+  checkQuantifiers(text, issues);
+  checkCollocations(text, issues);
+  checkRedundant(text, issues);
+  checkInformalWords(text, issues);
+  checkRegisterVocab(text, issues, mode);
+  checkLowercaseI(text, issues);
+  checkRepeatedWord(text, issues);
+  checkPunctuation(text, issues);
+  checkSentenceCase(text, issues);
+  checkLongSentences(text, issues);
+  checkPassiveVoice(text, issues, mode);
+  checkOverusedVocab(text, issues, mode);
+  issues.sort((a, b) => a.start - b.start || (b.end - b.start) - (a.end - a.start));
+  return issues;
+}
+
+/* ---------- resolve overlapping issues for rendering ---------- */
+function resolveNonOverlapping(issues) {
+  const ranked = issues.map((it, idx) => ({ it, idx }))
+    .sort((a, b) => (CATEGORY_PRIORITY[b.it.category] - CATEGORY_PRIORITY[a.it.category])
+      || ((b.it.end - b.it.start) - (a.it.end - a.it.start)) || (a.it.start - b.it.start));
+  const occupied = [];
+  const accepted = [];
+  for (const { it, idx } of ranked) {
+    let overlap = false;
+    for (const [s, e] of occupied) {
+      if (it.start < e && s < it.end) { overlap = true; break; }
+    }
+    if (!overlap) { occupied.push([it.start, it.end]); accepted.push(idx); }
+  }
+  const acceptedSet = new Set(accepted);
+  return issues.map((it, idx) => acceptedSet.has(idx)).map((visible, idx) => ({ ...issues[idx], visible }))
+    .filter(it => it.visible)
+    .sort((a, b) => a.start - b.start);
+}
+
+/* ===================== STATISTICS ===================== */
+const STOPWORDS = new Set(["the","a","an","and","or","but","if","then","so","of","to","in","on","at",
+  "for","with","by","is","are","was","were","be","been","being","this","that","these","those","it",
+  "its","i","you","he","she","we","they","them","his","her","our","your","their","as","from","not",
+  "do","does","did","have","has","had","will","would","can","could","should","may","might","must",
+  "there","here","which","who","whom","what","when","where","why","how"]);
+
+const LINKING_DEVICES = ["although","because","however","therefore","moreover","nevertheless","whereas",
+  "furthermore","consequently","despite","while","since","unless","meanwhile","thus","hence","additionally",
+  "in addition","on the other hand","as a result","in contrast","for instance","for example","in conclusion",
+  "notwithstanding","provided that","given that","in spite of"];
+
+function computeStats(text) {
+  const trimmed = text.trim();
+  const words = trimmed.length ? (trimmed.match(/[A-Za-z']+/g) || []) : [];
+  const chars = trimmed.length;
+  const sentences = splitSentences(text).filter(s => /[A-Za-z]/.test(s.text));
+  const paragraphs = trimmed.length ? trimmed.split(/\n{2,}|\n/).map(p => p.trim()).filter(Boolean).length : 0;
+  const wordCount = words.length;
+  const sentenceCount = Math.max(sentences.length, wordCount ? 1 : 0);
+  const avgWordLen = wordCount ? words.reduce((a, w) => a + w.length, 0) / wordCount : 0;
+  const avgSentenceLen = sentenceCount ? wordCount / sentenceCount : 0;
+  const lower = words.map(w => w.toLowerCase());
+  const contentWords = lower.filter(w => w.length > 3 && !STOPWORDS.has(w));
+  const uniqueContent = new Set(contentWords);
+  const lexicalDiversity = contentWords.length ? uniqueContent.size / contentWords.length : 0;
+  let linkingCount = 0;
+  const lowerText = text.toLowerCase();
+  for (const device of LINKING_DEVICES) {
+    const re = new RegExp("\\b" + device.replace(/[.*+?^${}()|[\]\\]/g, "\\CORE_ENGINE_PLACEHOLDER") + "\\b", "g");
+    const found = lowerText.match(re);
+    if (found) linkingCount += found.length;
+  }
+  const readSeconds = Math.round((wordCount / 200) * 60);
+  return { wordCount, chars, sentenceCount, paragraphs, avgWordLen, avgSentenceLen, lexicalDiversity, linkingCount, readSeconds };
+}
+
+/* ===================== SCORING ===================== */
+const WEIGHT = {
+  grammar: { error: 6, suggestion: 2.5 },
+  spelling: { error: 4.5, suggestion: 4.5 },
+  punct: { error: 2, suggestion: 1 },
+  register: { error: 3, suggestion: 1.2 },
+  style: { error: 1.5, suggestion: 1.2 },
+  vocab: { error: 0.4, suggestion: 0.4 }
+};
+
+function categoryCounts(issues) {
+  const counts = { grammar: { error: 0, suggestion: 0 }, spelling: { error: 0, suggestion: 0 },
+    punct: { error: 0, suggestion: 0 }, register: { error: 0, suggestion: 0 },
+    style: { error: 0, suggestion: 0 }, vocab: { error: 0, suggestion: 0 } };
+  for (const it of issues) counts[it.category][it.severity]++;
+  return counts;
+}
+
+function computeScore(issues) {
+  const counts = categoryCounts(issues);
+  let deduction = 0;
+  for (const cat of Object.keys(WEIGHT)) {
+    deduction += counts[cat].error * WEIGHT[cat].error + counts[cat].suggestion * WEIGHT[cat].suggestion;
+  }
+  deduction = Math.min(deduction, 65);
+  return { score: Math.round(100 - deduction), counts, deduction };
+}
+
+function letterGrade(score) {
+  if (score >= 97) return "A+";
+  if (score >= 93) return "A";
+  if (score >= 90) return "A-";
+  if (score >= 87) return "B+";
+  if (score >= 83) return "B";
+  if (score >= 80) return "B-";
+  if (score >= 77) return "C+";
+  if (score >= 73) return "C";
+  if (score >= 70) return "C-";
+  if (score >= 65) return "D+";
+  if (score >= 60) return "D";
+  return "F";
+}
+
+function computeCEFR(stats, issues) {
+  const sentLenScore = Math.min(stats.avgSentenceLen / 22, 1.3) * 30;
+  const lexScore = Math.min(stats.lexicalDiversity / 0.55, 1.3) * 25;
+  const wordLenScore = Math.min(stats.avgWordLen / 5.2, 1.3) * 20;
+  const subordinationRatio = stats.sentenceCount ? stats.linkingCount / stats.sentenceCount : 0;
+  const linkScore = Math.min(subordinationRatio / 0.5, 1.3) * 25;
+  let complexity = sentLenScore + lexScore + wordLenScore + linkScore;
+  const counts = categoryCounts(issues);
+  const errorDensity = stats.wordCount ? (counts.grammar.error + counts.spelling.error) / stats.wordCount : 0;
+  let adjusted = complexity - errorDensity * 400;
+  adjusted = Math.max(0, Math.min(100, adjusted));
+  let level, label;
+  if (adjusted < 20) { level = "A1"; label = "Beginner"; }
+  else if (adjusted < 35) { level = "A2"; label = "Elementary"; }
+  else if (adjusted < 50) { level = "B1"; label = "Intermediate"; }
+  else if (adjusted < 65) { level = "B2"; label = "Upper-Intermediate"; }
+  else if (adjusted < 80) { level = "C1"; label = "Advanced"; }
+  else { level = "C2"; label = "Proficient"; }
+  return { level, label, complexity: Math.round(adjusted) };
+}
+
+function computeBars(issues, stats) {
+  const counts = categoryCounts(issues);
+  const clamp = (v) => Math.max(0, Math.min(100, Math.round(v)));
+  const grammarAccuracy = clamp(100 - (counts.grammar.error * 10 + counts.grammar.suggestion * 4));
+  const spellingAccuracy = clamp(100 - counts.spelling.error * 9);
+  const punctuationScore = clamp(100 - (counts.punct.error * 8 + counts.punct.suggestion * 4));
+  const lengthPenalty = stats.avgSentenceLen > 28 ? (stats.avgSentenceLen - 28) * 2 : 0;
+  const styleClarity = clamp(100 - counts.style.suggestion * 6 - lengthPenalty);
+  const vocabRange = clamp(stats.lexicalDiversity * 150);
+  const registerTone = clamp(100 - (counts.register.error * 10 + counts.register.suggestion * 5));
+  return [
+    { key: "grammar", label: "Grammar Accuracy", value: grammarAccuracy,
+      note: counts.grammar.error + counts.grammar.suggestion === 0 ? "No grammatical errors detected." : `${counts.grammar.error} error(s), ${counts.grammar.suggestion} point(s) worth checking.` },
+    { key: "spelling", label: "Spelling & Orthography", value: spellingAccuracy,
+      note: counts.spelling.error === 0 ? "Spelling is clean throughout." : `${counts.spelling.error} misspelling(s) found.` },
+    { key: "vocab", label: "Vocabulary Range", value: vocabRange,
+      note: "Lexical diversity of content words in this passage." },
+    { key: "punct", label: "Punctuation & Mechanics", value: punctuationScore,
+      note: counts.punct.error === 0 ? "Punctuation is handled correctly." : `${counts.punct.error} punctuation issue(s) found.` },
+    { key: "style", label: "Style & Clarity", value: styleClarity,
+      note: stats.avgSentenceLen ? `Average sentence length: ${stats.avgSentenceLen.toFixed(1)} words.` : "" },
+    { key: "register", label: "Register & Tone", value: registerTone,
+      note: counts.register.error + counts.register.suggestion === 0 ? "Tone is consistent with the chosen style." : `${counts.register.error + counts.register.suggestion} tone/formality note(s).` }
+  ];
+}
+
+/* ===================== PROFESSOR'S REPORT ===================== */
+function escapeHtml(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function pickExamples(issues, category, n) {
+  return issues.filter(i => i.category === category).slice(0, n);
+}
+
+function generateTutorial(text, issues, stats, score, grade, cefr, mode) {
+  const counts = categoryCounts(issues);
+  const totalErrors = counts.grammar.error + counts.spelling.error + counts.punct.error + counts.register.error;
+  const totalNotes = Object.values(counts).reduce((a, c) => a + c.error + c.suggestion, 0);
+  const modeLabel = { academic: "an academic essay", business: "a business communication", exam: "an examination response", casual: "an everyday piece of writing" }[mode] || "a piece of writing";
+
+  const paras = [];
+
+  // Opening
+  let opening;
+  if (grade.startsWith("A")) opening = `I have read your submission with genuine pleasure. This is confident, largely correct English, and it reads as ${modeLabel} of real quality.`;
+  else if (grade.startsWith("B")) opening = `This is a solid piece of work. The English is generally sound, with a handful of points that keep it from the very top marks.`;
+  else if (grade.startsWith("C")) opening = `There is a great deal to like in this submission, but a number of recurring errors hold it back from being truly polished English.`;
+  else if (grade.startsWith("D")) opening = `You have made a genuine attempt here, and the underlying ideas come through, but the English itself needs considerable further attention before it will read fluently.`;
+  else opening = `I want to be candid, because that is the more useful course: this piece requires substantial revision before the English will communicate reliably. Do not be discouraged — every error noted below is entirely fixable.`;
+  paras.push({ h: "Overall Impression", p: `${opening} On a text of ${stats.wordCount} words across ${stats.sentenceCount} sentence(s), I noted ${totalNotes} point(s) worth your attention, of which ${totalErrors} are outright errors and the remainder are suggestions for polish.` });
+
+  // Strengths
+  const strengths = [];
+  if (counts.spelling.error === 0 && stats.wordCount > 5) strengths.push("your spelling is entirely correct throughout");
+  if (counts.grammar.error === 0 && stats.wordCount > 5) strengths.push("I found no grammatical errors as such");
+  if (stats.linkingCount >= 2) strengths.push("you make good use of connecting devices (e.g. \"however\", \"because\", \"therefore\") to link your ideas");
+  if (stats.avgSentenceLen >= 12 && stats.avgSentenceLen <= 28) strengths.push("your sentence length is well-judged — neither so short that the writing feels choppy, nor so long that it becomes difficult to follow");
+  if (stats.lexicalDiversity >= 0.55) strengths.push("your vocabulary shows good range, without excessive repetition");
+  if (counts.punct.error === 0 && stats.wordCount > 5) strengths.push("your punctuation is handled correctly");
+  if (!strengths.length) strengths.push("the underlying argument is clear enough to follow despite the surface errors, which is, after all, the first requirement of any piece of writing");
+  paras.push({ h: "What Is Working Well", p: "Let me begin with what you have done well: " + strengths.slice(0, 3).join("; ") + "." });
+
+  // Weaknesses with examples
+  const catLabel = { grammar: "grammar", spelling: "spelling", punct: "punctuation", style: "style and concision", register: "register and formality" };
+  const dominant = Object.entries(counts).filter(([k]) => k !== "vocab")
+    .map(([k, v]) => [k, v.error + v.suggestion]).filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1]);
+  if (dominant.length) {
+    let text2 = "The recurring pattern I would ask you to address is in " + catLabel[dominant[0][0]] + ". ";
+    const examples = pickExamples(issues, dominant[0][0], 2);
+    for (const ex of examples) {
+      const fix = ex.fixes && ex.fixes.length ? ex.fixes[0] : null;
+      text2 += `You wrote <q>${escapeHtml(ex.match)}</q>` + (fix ? `, where I would write <q>${escapeHtml(fix)}</q>. ` : ". ") + escapeHtml(ex.why) + " ";
+    }
+    if (dominant.length > 1) {
+      text2 += `A secondary pattern worth watching is ${catLabel[dominant[1][0]]}, which occurred ${dominant[1][1]} time(s) in this passage.`;
+    }
+    paras.push({ h: "Where To Focus Your Revision", p: text2.trim() });
+  } else {
+    paras.push({ h: "Where To Focus Your Revision", p: "I have no substantial corrections to offer. Where I have made a note, it is a matter of polish rather than correctness — treat the suggestions in the Findings and Vocabulary panels as optional refinements." });
+  }
+
+  // Rule of thumb
+  const tips = {
+    grammar: "When in doubt about subject–verb agreement, isolate the subject by removing every phrase between it and the verb; the remaining bare noun should tell you whether the verb needs an -s.",
+    spelling: "Keep a short personal list of the words you misspell most often — for most writers it is the same dozen words that recur, and five minutes of deliberate practice resolves most of them permanently.",
+    punct: "Read a sentence aloud: a natural pause is usually a comma, a full stop is a genuine break in thought, and if you cannot decide, the sentence is very possibly two sentences.",
+    register: "Before submitting formal work, search your draft for apostrophes (contractions) and for the words \"get\", \"stuff\" and \"thing\" — each is a signal to reach for a more precise, formal alternative.",
+    style: "Long sentences are not, in themselves, sophisticated. Ask of every sentence over thirty words whether it could be two clear sentences instead of one crowded one."
+  };
+  const tipKey = dominant.length ? dominant[0][0] : "style";
+  paras.push({ h: "A Rule Worth Remembering", p: tips[tipKey] });
+
+  // CEFR
+  const cefrCaveat = stats.wordCount < 20 ? " A passage this short gives only a very rough impression — treat the estimate with particular caution." : "";
+  paras.push({ h: "Where This Places You", p: `If I were to place this piece of writing against the Common European Framework of Reference (CEFR), I would estimate it at roughly <b>${cefr.level} (${cefr.label})</b>. This is an informal estimate drawn from sentence complexity, vocabulary range and accuracy — treat it as a conversation starter with your own teacher, not a certified result.${cefrCaveat}` });
+
+  // Closing
+  let closing;
+  if (grade.startsWith("A")) closing = "Continue writing at this standard, and continue to read widely in English — it is, in the end, the surest way to keep expanding your range.";
+  else if (grade.startsWith("B") || grade.startsWith("C")) closing = "Revise the points above, read your draft aloud once before you submit it, and you will find this piece improves markedly with very little additional effort.";
+  else closing = "Please do revise this piece and, if possible, bring it to office hours. Improvement in written English is rarely a matter of talent — it is almost always a matter of noticing the same handful of patterns, correcting them deliberately, and practising until the correct form becomes automatic.";
+  paras.push({ h: null, p: closing });
+
+  return paras;
+}
+
+function generateReport(text, mode) {
+  const issues = analyze(text, mode);
+  const stats = computeStats(text);
+  const { score, deduction } = computeScore(issues);
+  const grade = stats.wordCount ? letterGrade(score) : null;
+  const cefr = computeCEFR(stats, issues);
+  const bars = computeBars(issues, stats);
+  const tutorial = stats.wordCount ? generateTutorial(text, issues, stats, score, grade, cefr, mode) : null;
+  return { issues, stats, score: stats.wordCount ? score : null, grade, cefr, bars, tutorial, deduction };
+}
+
+/* ===================== THESAURUS LOOKUP ===================== */
+function lookupSynonyms(word) {
+  const key = String(word || "").toLowerCase().trim();
+  if (!key) return null;
+  const entry = THESAURUS[key];
+  if (entry) return { word: key, found: true, groups: entry };
+  return { word: key, found: false, groups: [] };
+}
+
+/* ===================== SAFE REWRITE DRAFT ===================== */
+const AUTO_FIX_CATEGORIES = new Set(["grammar", "spelling", "punct"]);
+
+function buildRewriteDraft(text, issues) {
+  const candidates = issues.filter(it =>
+    AUTO_FIX_CATEGORIES.has(it.category) && it.severity === "error" &&
+    it.fixes && it.fixes.length === 1 && it.title !== "Possible subject–verb agreement slip"
+  );
+  const resolved = resolveNonOverlapping(candidates);
+  const ordered = [...resolved].sort((a, b) => b.start - a.start);
+  let draft = text;
+  for (const it of ordered) {
+    draft = draft.slice(0, it.start) + it.fixes[0] + draft.slice(it.end);
+  }
+  return { draft, appliedCount: resolved.length };
+}
+
+/* =====================================================================
+   UI wiring — connects the engine above to the page.
+   ===================================================================== */
+
+const CATEGORY_META = {
+  grammar: { label: "Tata Bahasa", color: "var(--grammar)" },
+  spelling: { label: "Ejaan", color: "var(--spelling)" },
+  punct: { label: "Tanda Baca", color: "var(--punct)" },
+  style: { label: "Gaya Bahasa", color: "var(--style)" },
+  register: { label: "Register", color: "var(--register)" },
+  vocab: { label: "Kosakata", color: "var(--vocab)" }
+};
+
+const SAMPLE_TEXTS = [
+  "In my opinion, I think that the goverment should to give more attention on education, because the quality of teacher in rural area are still very low. There is much problems that need to be fix, and i believe every student deserve a good teacher.",
+  "Yesterday my friend and me went to the restaurant near my house. The food was very very good and the waiter was friendly, but he dont bring the menu on time. We was waiting for almost thirty minutes before he finally come to our table. Its really need to be improve.",
+  "Nowadays, technology have change the way people communicate with each other. A lot of people is spending more time on their phone than talking face to face. This is a big problem because it can effect our relationship with family and friend."
+];
+
+const AUTOSAVE_KEY = "profquill_draft_v1";
+const MODE_KEY = "profquill_mode_v1";
+const HISTORY_KEY = "profquill_history_v1";
+
+const $ = (id) => document.getElementById(id);
+const editor = $("editor");
+const modeSelect = $("mode");
+const preview = $("preview");
+const legend = $("legend");
+const filtersEl = $("filters");
+const issueList = $("issueList");
+const badgeIssues = $("badgeIssues");
+const synInput = $("synInput");
+const synOut = $("synOut");
+const rewriteOut = $("rewriteOut");
+const historyOut = $("historyOut");
+const toastEl = $("toast");
+const mWords = $("mWords"), mChars = $("mChars"), mSents = $("mSents"), mPara = $("mPara"), mRead = $("mRead");
+
+let currentIssues = [];
+let currentResolved = [];
+let currentReport = null;
+let currentDraftText = "";
+let hiddenCategories = new Set();
+let issueFilter = null;
+let sampleIndex = 0;
+let toastTimer = null;
+let saveTimer = null;
+
+/* ---------- helpers ---------- */
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add("on");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove("on"), 2600);
+}
+
+function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(() => toast("Disalin ke clipboard.")).catch(() => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+function fallbackCopy(text) {
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.position = "fixed";
+  ta.style.left = "-9999px";
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand("copy"); toast("Disalin ke clipboard."); }
+  catch (e) { toast("Gagal menyalin. Salin secara manual."); }
+  document.body.removeChild(ta);
+}
+
+function formatReadTime(sec) {
+  if (sec < 60) return sec + " dtk";
+  return Math.round(sec / 60) + " mnt";
+}
+
+function formatDate(ts) {
+  const d = new Date(ts);
+  const day = d.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
+  const time = d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  return day + ", " + time;
+}
+
+function switchTab(name) {
+  document.querySelectorAll("#tabs button[data-tab]").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+  document.querySelectorAll(".pane").forEach(p => p.classList.toggle("on", p.id === "pane-" + name));
+}
+
+/* ---------- word wrapping for click-to-lookup ---------- */
+function wrapWords(str) {
+  let out = "";
+  const re = /[A-Za-z']+|[^A-Za-z']+/g;
+  let m;
+  while ((m = re.exec(str))) {
+    const tok = m[0];
+    if (/^[A-Za-z']+$/.test(tok)) {
+      out += `<span class="w" data-word="${escapeHtml(tok.toLowerCase())}">${escapeHtml(tok)}</span>`;
+    } else {
+      out += escapeHtml(tok);
+    }
+  }
+  return out;
+}
+
+/* ---------- preview rendering ---------- */
+function renderPreview() {
+  const text = editor.value;
+  if (!text.trim()) {
+    preview.innerHTML = '<div class="empty">Belum ada analisis. Tekan <b>Periksa &amp; Nilai</b> untuk melihat tanda kesalahan di sini.</div>';
+    return;
+  }
+  const visible = currentResolved.filter(it => !hiddenCategories.has(it.category));
+  let html = "";
+  let cursor = 0;
+  for (const it of visible) {
+    if (it.start > cursor) html += wrapWords(text.slice(cursor, it.start));
+    html += `<mark class="hl c-${it.category}" data-idx="${it._id}" title="${escapeHtml(it.message)}">${wrapWords(text.slice(it.start, it.end))}</mark>`;
+    cursor = it.end;
+  }
+  if (cursor < text.length) html += wrapWords(text.slice(cursor));
+  preview.innerHTML = html;
+}
+
+function renderLegend() {
+  const counts = {};
+  for (const c of Object.keys(CATEGORY_META)) counts[c] = 0;
+  for (const it of currentIssues) counts[it.category]++;
+  legend.innerHTML = Object.keys(CATEGORY_META).map(c => {
+    const meta = CATEGORY_META[c];
+    const off = hiddenCategories.has(c) ? " off" : "";
+    return `<span class="lg${off}" data-cat="${c}"><span class="dot" style="background:${meta.color}"></span>${meta.label} <span class="n">${counts[c]}</span></span>`;
+  }).join("");
+}
+
+legend.addEventListener("click", (e) => {
+  const el = e.target.closest(".lg");
+  if (!el) return;
+  const cat = el.dataset.cat;
+  if (hiddenCategories.has(cat)) hiddenCategories.delete(cat); else hiddenCategories.add(cat);
+  renderLegend();
+  renderPreview();
+});
+
+/* ---------- issues panel ---------- */
+function renderFilters() {
+  const counts = {};
+  for (const c of Object.keys(CATEGORY_META)) counts[c] = 0;
+  for (const it of currentIssues) counts[it.category]++;
+  const chips = [`<button class="chip${issueFilter === null ? " on" : ""}" data-cat="all">Semua (${currentIssues.length})</button>`];
+  for (const c of Object.keys(CATEGORY_META)) {
+    if (!counts[c]) continue;
+    chips.push(`<button class="chip${issueFilter === c ? " on" : ""}" data-cat="${c}">${CATEGORY_META[c].label} (${counts[c]})</button>`);
+  }
+  filtersEl.innerHTML = chips.join("");
+}
+
+filtersEl.addEventListener("click", (e) => {
+  const el = e.target.closest(".chip");
+  if (!el) return;
+  issueFilter = el.dataset.cat === "all" ? null : el.dataset.cat;
+  renderFilters();
+  renderIssuesList();
+});
+
+function renderIssueCard(it) {
+  const meta = CATEGORY_META[it.category];
+  const sevLabel = it.severity === "error" ? "Kesalahan" : "Saran";
+  const fix0 = it.fixes && it.fixes[0];
+  const quoteHtml = fix0
+    ? `<s>${escapeHtml(it.match)}</s> &rarr; <i>${escapeHtml(fix0)}</i>`
+    : `<s>${escapeHtml(it.match)}</s>`;
+  const fixButtons = (it.fixes || []).map((f, i) =>
+    `<button class="fixbtn" data-id="${it._id}" data-fix="${i}">${escapeHtml(f)} &rarr;</button>`
+  ).join("");
+  return `<div class="issue c-${it.category}" data-id="${it._id}">
+    <div class="top-row">
+      <span class="tag">${meta.label}</span>
+      <span class="sev">${sevLabel}</span>
+      <h4>${escapeHtml(it.title)}</h4>
+      <button class="jump" data-jump="${it._id}">Lihat di teks</button>
+    </div>
+    <div class="quote">${quoteHtml}</div>
+    <div class="msg">${escapeHtml(it.message)}</div>
+    <div class="why">${escapeHtml(it.why)}</div>
+    ${fixButtons ? `<div class="fixes">${fixButtons}</div>` : ""}
+  </div>`;
+}
+
+function renderIssuesList() {
+  const list = issueFilter ? currentIssues.filter(i => i.category === issueFilter) : currentIssues;
+  badgeIssues.textContent = currentIssues.length;
+  if (!currentIssues.length) {
+    issueList.innerHTML = '<div class="empty">Belum ada temuan. Jalankan pemeriksaan terlebih dahulu.</div>';
+    return;
+  }
+  if (!list.length) {
+    issueList.innerHTML = '<div class="empty">Tidak ada temuan pada kategori ini.</div>';
+    return;
+  }
+  issueList.innerHTML = list.map(renderIssueCard).join("");
+}
+
+issueList.addEventListener("click", (e) => {
+  const fixBtn = e.target.closest(".fixbtn");
+  if (fixBtn) { applyFix(Number(fixBtn.dataset.id), Number(fixBtn.dataset.fix)); return; }
+  const jumpBtn = e.target.closest(".jump");
+  if (jumpBtn) { jumpToIssue(Number(jumpBtn.dataset.jump)); return; }
+});
+
+function jumpToIssue(id) {
+  switchTab("issues");
+  const card = issueList.querySelector(`.issue[data-id="${id}"]`);
+  if (card) {
+    card.scrollIntoView({ behavior: "smooth", block: "center" });
+    card.classList.add("sel");
+    setTimeout(() => card.classList.remove("sel"), 1400);
+  }
+  const mark = preview.querySelector(`mark[data-idx="${id}"]`);
+  if (mark) {
+    mark.classList.add("sel");
+    setTimeout(() => mark.classList.remove("sel"), 1400);
+  }
+}
+
+function applyFix(id, fixIdx) {
+  const issue = currentIssues.find(i => i._id === id);
+  if (!issue || !issue.fixes || issue.fixes[fixIdx] === undefined) return;
+  const text = editor.value;
+  const fixText = issue.fixes[fixIdx];
+  editor.value = text.slice(0, issue.start) + fixText + text.slice(issue.end);
+  toast(`Diperbaiki: "${issue.match}" → "${fixText}"`);
+  runCheck({ switchTab: false });
+}
+
+/* ---------- preview click -> issue detail / synonym lookup ---------- */
+preview.addEventListener("click", (e) => {
+  const markEl = e.target.closest("mark.hl");
+  if (markEl) { jumpToIssue(Number(markEl.dataset.idx)); return; }
+  const wordEl = e.target.closest(".w");
+  if (wordEl) {
+    const word = wordEl.dataset.word.replace(/^'+|'+$/g, "");
+    doSynonymLookup(word);
+    switchTab("syn");
+  }
+});
+
+/* ---------- report tab ---------- */
+function renderReport() {
+  const pane = $("pane-report");
+  if (!currentReport || currentReport.score === null) {
+    pane.innerHTML = '<div class="empty">Laporan penilaian akan muncul di sini setelah Anda menekan <b>Periksa &amp; Nilai</b>.</div>';
+    return;
+  }
+  const r = currentReport;
+  const barsHtml = r.bars.map(b => `
+    <div class="bar">
+      <div class="r"><b>${escapeHtml(b.label)}</b><span class="v">${b.value}%</span></div>
+      <div class="track"><div class="fill" style="width:${b.value}%;background:${CATEGORY_META[b.key] ? CATEGORY_META[b.key].color : "var(--oxford)"}"></div></div>
+      <div class="note">${escapeHtml(b.note)}</div>
+    </div>`).join("");
+  const tutorialHtml = r.tutorial.map(p => (p.h ? `<h3>${escapeHtml(p.h)}</h3>` : "") + `<p>${p.p}</p>`).join("");
+  pane.innerHTML = `
+    <div class="gradebox">
+      <div class="gradeltr">${r.grade}</div>
+      <div class="gradeinfo">
+        <div class="n">${r.score}<small> / 100</small></div>
+        <div class="lab">Nilai Keseluruhan</div>
+      </div>
+      <div class="cefr">
+        <div class="v">${r.cefr.level}</div>
+        <div class="l">${escapeHtml(r.cefr.label)}</div>
+      </div>
+    </div>
+    <div class="bars">${barsHtml}</div>
+    <div class="tutorial">
+      ${tutorialHtml}
+      <div class="sig">&mdash; Prof. E. H. Quill, Faculty of Rhetoric &amp; Composition</div>
+    </div>`;
+}
+
+/* ---------- rewrite tab ---------- */
+function buildRewriteHTML(text, issues) {
+  const candidates = issues.filter(it =>
+    AUTO_FIX_CATEGORIES.has(it.category) && it.severity === "error" &&
+    it.fixes && it.fixes.length === 1 && it.title !== "Possible subject–verb agreement slip"
+  );
+  const resolved = resolveNonOverlapping(candidates);
+  let html = "", plain = "", cursor = 0;
+  for (const it of resolved) {
+    html += escapeHtml(text.slice(cursor, it.start));
+    plain += text.slice(cursor, it.start);
+    html += `<ins>${escapeHtml(it.fixes[0])}</ins>`;
+    plain += it.fixes[0];
+    cursor = it.end;
+  }
+  html += escapeHtml(text.slice(cursor));
+  plain += text.slice(cursor);
+  return { html, plain, appliedCount: resolved.length };
+}
+
+function renderRewrite() {
+  if (!currentReport || currentReport.score === null) {
+    rewriteOut.innerHTML = '<div class="empty">Jalankan pemeriksaan terlebih dahulu.</div>';
+    currentDraftText = "";
+    return;
+  }
+  const { html, plain, appliedCount } = buildRewriteHTML(editor.value, currentIssues);
+  currentDraftText = plain;
+  if (!appliedCount) {
+    rewriteOut.innerHTML = '<div class="empty">Tidak ada koreksi berkeyakinan tinggi yang perlu diterapkan &mdash; teks Anda sudah bersih dari kesalahan tata bahasa, ejaan, dan tanda baca yang jelas.</div>';
+    return;
+  }
+  rewriteOut.innerHTML = `<div class="diffbox">${html}</div>
+    <p class="hint" style="margin-top:10px">${appliedCount} koreksi diterapkan secara otomatis (ditandai hijau).</p>`;
+}
+
+$("btnUseRewrite").addEventListener("click", () => {
+  if (!currentDraftText) { toast("Tidak ada draf untuk digunakan."); return; }
+  editor.value = currentDraftText;
+  toast("Draf perbaikan diterapkan ke editor.");
+  runCheck({ switchTab: false });
+});
+$("btnCopyRewrite").addEventListener("click", () => {
+  if (!currentDraftText) { toast("Tidak ada draf untuk disalin."); return; }
+  copyText(currentDraftText);
+});
+
+/* ---------- synonym / thesaurus tab ---------- */
+const REGISTER_CLASS = { formal: "reg-formal", neutral: "reg-neutral", informal: "reg-informal", academic: "reg-academic" };
+
+function doSynonymLookup(word) {
+  const res = lookupSynonyms(word);
+  synInput.value = word;
+  if (!res || !res.found) {
+    synOut.innerHTML = `<div class="empty">Kata <b>"${escapeHtml(word)}"</b> belum ada dalam kamus offline ini.<br>Coba kata dasar yang lebih umum, misalnya: ${OVERUSED_VOCAB.slice(0, 8).map(w => `<b>${w}</b>`).join(", ")}.</div>`;
+    return;
+  }
+  let html = `<div class="synhead">${escapeHtml(res.word)}<small>${res.groups.length} makna ditemukan</small></div>`;
+  for (const g of res.groups) {
+    html += `<div class="syngroup"><div class="gl">${escapeHtml(g.sense)}</div>`;
+    for (const [syn, reg] of g.syns) {
+      const cls = REGISTER_CLASS[reg] || "reg-neutral";
+      html += `<span class="syn"><span class="t">${escapeHtml(syn)}<span class="regchip ${cls}">${escapeHtml(reg)}</span></span></span>`;
+    }
+    html += `</div>`;
+  }
+  synOut.innerHTML = `<div class="ctxbox">Pilih kata yang formalitasnya sesuai dengan konteks tulisan Anda &mdash; label menunjukkan tingkat formalitas (formal / netral / informal / akademik).</div>` + html;
+}
+
+$("btnSyn").addEventListener("click", () => {
+  const w = synInput.value.trim();
+  if (w) doSynonymLookup(w);
+});
+synInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") { e.preventDefault(); const w = synInput.value.trim(); if (w) doSynonymLookup(w); }
+});
+
+/* ---------- history ---------- */
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]"); } catch (e) { return []; }
+}
+function saveHistoryEntry(report, text) {
+  if (report.score === null) return;
+  const hist = loadHistory();
+  hist.unshift({ date: Date.now(), score: report.score, grade: report.grade, words: report.stats.wordCount, snippet: text.trim().replace(/\s+/g, " ").slice(0, 90) });
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(hist.slice(0, 40)));
+}
+function renderHistory() {
+  const hist = loadHistory();
+  if (!hist.length) { historyOut.innerHTML = '<div class="empty">Belum ada riwayat.</div>'; return; }
+  historyOut.innerHTML = hist.map(h => `
+    <div class="hrow">
+      <span class="d">${formatDate(h.date)}</span>
+      <span class="g">${h.grade || "-"}</span>
+      <div class="hbar"><i style="width:${h.score}%"></i></div>
+      <span class="t">${escapeHtml(h.snippet)}${h.snippet.length >= 90 ? "…" : ""}</span>
+    </div>`).join("");
+}
+$("btnClearHistory").addEventListener("click", () => {
+  if (!loadHistory().length) return;
+  if (!confirm("Hapus seluruh riwayat pemeriksaan pada perangkat ini?")) return;
+  localStorage.removeItem(HISTORY_KEY);
+  renderHistory();
+  toast("Riwayat dihapus.");
+});
+
+/* ---------- meter / stats ---------- */
+function updateMeter() {
+  const stats = computeStats(editor.value);
+  mWords.textContent = stats.wordCount;
+  mChars.textContent = stats.chars;
+  mSents.textContent = stats.sentenceCount;
+  mPara.textContent = stats.paragraphs;
+  mRead.textContent = formatReadTime(stats.readSeconds);
+}
+
+/* ---------- main check pipeline ---------- */
+function runCheck(opts) {
+  opts = opts || {};
+  const text = editor.value;
+  const mode = modeSelect.value;
+  const report = generateReport(text, mode);
+  currentReport = report;
+  currentIssues = report.issues.map((it, i) => ({ ...it, _id: i }));
+  currentResolved = resolveNonOverlapping(currentIssues);
+  renderPreview();
+  renderLegend();
+  renderFilters();
+  renderIssuesList();
+  renderReport();
+  renderRewrite();
+  updateMeter();
+  if (report.score !== null) saveHistoryEntry(report, text);
+  renderHistory();
+  if (opts.switchTab !== false) switchTab("report");
+}
+
+$("btnCheck").addEventListener("click", () => {
+  if (!editor.value.trim()) { toast("Tulis atau tempel teks bahasa Inggris terlebih dahulu."); return; }
+  runCheck({ switchTab: true });
+});
+
+$("btnFixAll").addEventListener("click", () => {
+  if (!editor.value.trim()) { toast("Tidak ada teks untuk diperbaiki."); return; }
+  const issues = analyze(editor.value, modeSelect.value);
+  const { draft, appliedCount } = buildRewriteDraft(editor.value, issues);
+  if (!appliedCount) { toast("Tidak ada koreksi berkeyakinan tinggi yang bisa diterapkan."); return; }
+  editor.value = draft;
+  toast(`${appliedCount} koreksi diterapkan secara otomatis.`);
+  runCheck({ switchTab: false });
+});
+
+$("btnCopy").addEventListener("click", () => {
+  if (!editor.value.trim()) { toast("Tidak ada teks untuk disalin."); return; }
+  copyText(editor.value);
+});
+
+$("btnPrint").addEventListener("click", () => {
+  if (!currentReport || currentReport.score === null) { toast("Jalankan pemeriksaan terlebih dahulu."); return; }
+  window.print();
+});
+
+$("btnSample").addEventListener("click", () => {
+  editor.value = SAMPLE_TEXTS[sampleIndex % SAMPLE_TEXTS.length];
+  sampleIndex++;
+  updateMeter();
+  scheduleAutosave();
+  toast("Contoh teks dimuat. Tekan Periksa & Nilai.");
+});
+
+$("btnClear").addEventListener("click", () => {
+  if (!editor.value.trim()) return;
+  if (!confirm("Kosongkan teks di editor?")) return;
+  editor.value = "";
+  currentIssues = []; currentResolved = []; currentReport = null; currentDraftText = "";
+  hiddenCategories = new Set(); issueFilter = null;
+  renderPreview(); renderLegend(); renderFilters(); renderIssuesList(); renderReport(); renderRewrite(); updateMeter();
+  scheduleAutosave();
+});
+
+/* ---------- tabs ---------- */
+$("tabs").addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-tab]");
+  if (b) switchTab(b.dataset.tab);
+});
+
+/* ---------- autosave ---------- */
+function scheduleAutosave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try { localStorage.setItem(AUTOSAVE_KEY, editor.value); } catch (e) {}
+  }, 400);
+}
+editor.addEventListener("input", () => { updateMeter(); scheduleAutosave(); });
+modeSelect.addEventListener("change", () => {
+  try { localStorage.setItem(MODE_KEY, modeSelect.value); } catch (e) {}
+});
+window.addEventListener("beforeunload", () => {
+  try { localStorage.setItem(AUTOSAVE_KEY, editor.value); } catch (e) {}
+});
+
+/* ---------- init ---------- */
+(function init() {
+  try {
+    const savedMode = localStorage.getItem(MODE_KEY);
+    if (savedMode) modeSelect.value = savedMode;
+    const savedText = localStorage.getItem(AUTOSAVE_KEY);
+    if (savedText) editor.value = savedText;
+  } catch (e) {}
+  updateMeter();
+  renderLegend();
+  renderFilters();
+  renderHistory();
+})();
+</script>
+</body>
+</html>
