@@ -1,6 +1,6 @@
-> £ **Baru:** [**Catatan Keuangan**](keuangan/) — aplikasi catatan keuangan bulanan untuk **dua
-> orang dengan dua HP**, dalam **poundsterling (£)**, lengkap dengan anggaran per kategori,
-> sinkronisasi real-time, dan **review setiap bulan**.
+> £ **Baru:** [**Catatan Keuangan**](keuangan/) — aplikasi pencatatan keuangan bulanan **pribadi**
+> dalam **poundsterling (£)**: batas pengeluaran rinci, scan struk belanja, dan **review bulanan**
+> berikut grafik yang bisa disimpan sebagai PDF.
 > Panduan: [keuangan/PANDUAN_KEUANGAN.md](keuangan/PANDUAN_KEUANGAN.md).
 
 # 🍽️ Warung COGS — Kalkulator HPP & Kasir Restoran
